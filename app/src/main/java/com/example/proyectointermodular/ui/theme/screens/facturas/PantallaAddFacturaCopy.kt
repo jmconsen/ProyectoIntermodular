@@ -1,7 +1,6 @@
 package com.example.proyectointermodular.ui.theme.screens.facturas
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,15 +12,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,11 +38,9 @@ import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.ui.theme.GrisOscuro2
 import com.example.proyectointermodular.ui.theme.Negro
 import com.example.proyectointermodular.ui.theme.viewmodel.FacturaViewModel
-import androidx.compose.material3.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaAddFactura(
+fun PantallaAddFacturaCopy(
     navHostController: NavHostController,
     facturaViewModel: FacturaViewModel = viewModel()
 ) {
@@ -60,38 +54,12 @@ fun PantallaAddFactura(
     var cifReceptor by remember { mutableStateOf("") }
     var direccionReceptor by remember { mutableStateOf("") }
     var baseImponible by remember { mutableStateOf("") }
-    var tipoIva by remember { mutableStateOf("21%") }  // Valor por defecto
-    //var cuotaIva by remember { mutableStateOf("0.0") }
-    //var total by remember { mutableStateOf("0.0") }
-    var expanded by remember { mutableStateOf(false) }
+    var tipoIva by remember { mutableStateOf("") }
+    var cuotaIva by remember { mutableStateOf("") }
+    var total by remember { mutableStateOf("") }
     var mostrarDialogoExito by remember { mutableStateOf(false) }
     var mostrarDialogoError by remember { mutableStateOf(false) }
     var mensajeErrorValidacion by remember { mutableStateOf("") }
-
-    val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
-
-    // Calcular cuota IVA de forma reactiva
-    val cuotaIva by remember(baseImponible, tipoIva) {
-        derivedStateOf {
-            val base = baseImponible.toDoubleOrNull() ?: 0.0
-            val iva = when (tipoIva) {
-                "21%" -> 0.21
-                "10%" -> 0.10
-                "4%" -> 0.04
-                else -> 0.0
-            }
-            (base * iva).toString()
-        }
-    }
-
-    // Calcular total de forma reactiva
-    val total by remember(baseImponible, cuotaIva) {
-        derivedStateOf {
-            val base = baseImponible.toDoubleOrNull() ?: 0.0
-            val cuota = cuotaIva.toDoubleOrNull() ?: 0.0
-            (base + cuota).toString()
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -176,7 +144,7 @@ fun PantallaAddFactura(
                 onValueChange = { nombreEmisor = it },
                 label = { Text("Nombre Emisor") },
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = TextStyle(color = Negro),
+                textStyle = TextStyle(color = Color.White),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Negro,
                     unfocusedTextColor = Negro,
@@ -280,7 +248,6 @@ fun PantallaAddFactura(
                 )
             )
 
-            /*
             OutlinedTextField(
                 value = baseImponible,
                 onValueChange = { baseImponible = it },
@@ -335,7 +302,6 @@ fun PantallaAddFactura(
                 )
             )
 
-
             OutlinedTextField(
                 value = total,
                 onValueChange = { total = it },
@@ -353,73 +319,11 @@ fun PantallaAddFactura(
                     unfocusedBorderColor = Negro
                 )
             )
-            */
-
-            OutlinedTextField(
-                value = baseImponible,
-                onValueChange = { baseImponible = it },
-                label = { Text("Base Imponible") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-
-            // Desplegable para seleccionar el tipo de IVA
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = it }
-            ) {
-                OutlinedTextField(
-                    value = tipoIva,
-                    onValueChange = { },
-                    label = { Text("Tipo IVA") },
-                    readOnly = true,
-                    modifier = Modifier
-                        .menuAnchor() // Indica que este campo es un activador del menú
-                        .fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = AzulClaro,
-                        unfocusedBorderColor = Negro
-                    )
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    tiposIva.forEach { tipo ->
-                        DropdownMenuItem(
-                            text = { Text(tipo) },
-                            onClick = {
-                                tipoIva = tipo
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            // Campos calculados automáticamente
-            OutlinedTextField(
-                value = cuotaIva,
-                onValueChange = { },
-                label = { Text("Cuota IVA") },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = total,
-                onValueChange = { },
-                label = { Text("Total") },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
 
             BotonEstandar(
                 texto = "Guardar Factura",
                 onClick = {
-                    val (esValido, mensaje) = validarCamposFacturaAdd(
+                    val (esValido, mensaje) = validarCamposFacturaAddCopy(
                         //id,
                         numeroFactura,
                         descFactura,
@@ -500,7 +404,7 @@ fun PantallaAddFactura(
     }
 }
 
-fun validarCamposFacturaAdd(
+fun validarCamposFacturaAddCopy(
     //id: Int,
     numeroFactura: String,
     descFactura: String,
@@ -545,9 +449,8 @@ fun validarCamposFacturaAdd(
     }
 
     // Validación de CIF
-    val cifRegex = "^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$".toRegex()
-
-    if (!cifEmisor.matches(cifRegex) || !cifReceptor.matches(cifRegex)) {
+    val dniRegex = "^[0-9]{8}[TRWAGMYFPDXBNJZSQVHLCKE]$".toRegex()
+    if (!cifEmisor.matches(dniRegex) || !cifReceptor.matches(dniRegex)) {
         return Pair(false, "El formato del CIF no es válido.")
     }
 
@@ -562,9 +465,11 @@ fun validarCamposFacturaAdd(
     }
     if (descFactura.any { it.isDigit() } ||
         nombreEmisor.any { it.isDigit() } ||
-        nombreReceptor.any { it.isDigit() }
+        direccionEmisor.any { it.isDigit() } ||
+        nombreReceptor.any { it.isDigit() } ||
+        direccionReceptor.any { it.isDigit() }
         ) {
-        return Pair(false, "Descripción y Nombre no deben contener números.")
+        return Pair(false, "Descripción, Nombre y Dirección no deben contener números.")
     }
 
     return Pair(true, null)
