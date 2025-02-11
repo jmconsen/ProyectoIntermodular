@@ -136,7 +136,7 @@ fun PantallaLogin(navHostController: NavHostController){
                                     currentUser?.let {
                                         mensajeError = "Bienvenido, ${it.email ?: "Usuario"}"
                                     }
-                                    navHostController.navigate(route = "PantallaDashboardVentas") {
+                                    navHostController.navigate(route = "PantallaFormularioFacturas") {
                                         popUpTo("PantallaLogin") { inclusive = true }
                                     }
                                 } else {
