@@ -1,56 +1,44 @@
 package com.example.proyectointermodular
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
-import com.example.proyectointermodular.ui.theme.screens.MainScreen
 import com.example.proyectointermodular.ui.theme.screens.PantallaLogin
+import com.example.proyectointermodular.ui.theme.screens.PantallaMenu
 import com.example.proyectointermodular.ui.theme.screens.PantallaRegistro
-import com.example.proyectointermodular.ui.theme.screens.facturas.PantallaAddFactura
 import com.example.proyectointermodular.ui.theme.screens.facturas.PantallaFormularioFacturas
-import com.example.proyectointermodular.ui.theme.screens.facturas.PantallaModificarFactura
+import com.example.proyectointermodular.ui.theme.screens.facturasRecibidas.PantallaFormularioFacturasRecibidas
+import com.example.proyectointermodular.ui.theme.viewmodel.FacturaRecibidaViewModel
+import com.example.proyectointermodular.ui.theme.viewmodel.FacturaViewModel
 
 @Composable
-fun NavigationApp(navHostController: NavHostController, authManager: AuthManager, modifier: Modifier = Modifier) {
-
-    val startDestination = if (authManager.isUserLoggedIn()) "PantallaFormularioFacturas" else "PantallaLogin"
+fun NavigationApp(navHostController: NavHostController, authManager: AuthManager) {
+    val startDestination = if (authManager.isUserLoggedIn()) "PantallaMenu" else "PantallaLogin"
 
     NavHost(
         navController = navHostController,
         startDestination = startDestination,
     ) {
-        // FACTURAS
-        composable("PantallaAddFactura") { PantallaAddFactura(navHostController) }
+        composable("PantallaMenu") { PantallaMenu(navHostController) }
+
+        // Facturas
         composable("PantallaFormularioFacturas") {
-            PantallaFormularioFacturas(
-                navHostController = navHostController,
-                facturaViewModel = viewModel()
-            )
+            PantallaFormularioFacturas(navHostController = navHostController, facturaViewModel = viewModel<FacturaViewModel>())
         }
-        composable(
-            route = "PantallaModificarFactura/{id}",
-            arguments = listOf(navArgument("id") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id")
-            PantallaModificarFactura(
-                id = id,
-                navHostController = navHostController
-            )
+        composable("PantallaFormularioFacturasRecibidas") {
+            PantallaFormularioFacturasRecibidas(navHostController = navHostController, facturaRecibidaViewModel = viewModel<FacturaRecibidaViewModel>())
         }
 
 
-        //LOGIN REGISTRO
-        composable("PantallaLogin") { PantallaLogin (navHostController) }
-        composable("PantallaRegistro") { PantallaRegistro (navHostController) }
-
-        composable("MainScreen") { MainScreen(authManager, navHostController) }
 
 
+        // Login / Registro
+        composable("PantallaLogin") { PantallaLogin(navHostController) }
+        composable("PantallaRegistro") { PantallaRegistro(navHostController) }
+    }
+}
 
         /*
         //EMPLEADO
@@ -86,8 +74,8 @@ fun NavigationApp(navHostController: NavHostController, authManager: AuthManager
         composable("PantallaFormularioProductos") { PantallaFormularioProductos (navHostController, productoViewModel = viewModel()) }
 
 
-         */
-        
+
 
     }
 }
+  */
