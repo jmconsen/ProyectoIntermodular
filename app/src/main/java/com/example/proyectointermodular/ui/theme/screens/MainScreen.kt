@@ -28,7 +28,7 @@ fun MainScreen(authManager: AuthManager, navController: NavHostController) {
         NavigationApp(
             navHostController = navController,
             authManager = authManager,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding) // Se pasa el padding correctamente
         )
     }
 }

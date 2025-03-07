@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Inventory
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.RequestQuote
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -37,22 +35,26 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
         NavigationBar(
             containerColor = AzulOscuro,
         ) {
-            // CLIENTES
+
+
+            // FACTURAS EMITIDAS
             NavigationBarItem(
-                icon = { Icon(
-                    Icons.Filled.Person,
-                    contentDescription = "Clientes",
-                    tint = GrisOscuro2
-                ) },
+                icon = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ReceiptLong,
+                        contentDescription = "Facturas-emitidas",
+                        tint = GrisOscuro2
+                    )
+                },
                 label = {
                     Text(
-                        "Clientes",
+                        "Facturas emitidas",
                         color = GrisOscuro2
                     )
                 },
-                selected = currentRoute == "PantallaFormularioClientes",
+                selected = currentRoute == "PantallaFormularioFacturas",
                 onClick = {
-                    navController.navigate("PantallaFormularioClientes") {
+                    navController.navigate("PantallaFormularioFacturasEmitidas") {
                         popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
@@ -60,24 +62,24 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
                 }
             )
 
-            // PRODUCTOS
+            // FACTURAS RECIBIDAS
             NavigationBarItem(
                 icon = {
                     Icon(
-                        Icons.Filled.Inventory,
-                        contentDescription = "Productos",
+                        Icons.Filled.RequestQuote,
+                        contentDescription = "Facturas-recibidas",
                         tint = GrisOscuro2
                     )
                 },
                 label = {
                     Text(
-                        "Productos",
+                        "Facturas recibidas",
                         color = GrisOscuro2
                     )
                 },
-                selected = currentRoute == "PantallaFormularioProductos",
+                selected = currentRoute == "PantallaFormularioFacturasRecibidas",
                 onClick = {
-                    navController.navigate("PantallaFormularioProductos") {
+                    navController.navigate("PantallaFormularioFacturasRecibidas") {
                         popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
@@ -85,55 +87,6 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
                 }
             )
 
-            // VENTAS
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        Icons.Filled.ShoppingCart,
-                        contentDescription = "Ventas",
-                        tint = GrisOscuro2
-                    )
-                },
-                label = {
-                    Text(
-                        "Ventas",
-                        color = GrisOscuro2
-                    )
-                },
-                selected = currentRoute == "PantallaDashboardVentas",
-                onClick = {
-                    navController.navigate("PantallaDashboardVentas") {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            )
-
-            // EMPLEADOS
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        Icons.Filled.Group,
-                        contentDescription = "Empleados",
-                        tint = GrisOscuro2
-                    )
-                },
-                label = {
-                    Text(
-                        "Empleados",
-                        color = GrisOscuro2
-                    )
-                },
-                selected = currentRoute == "PantallaFormularioEmpleados",
-                onClick = {
-                    navController.navigate("PantallaFormularioEmpleados") {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            )
 
             // CIERRE DE SESIÓN
             NavigationBarItem(

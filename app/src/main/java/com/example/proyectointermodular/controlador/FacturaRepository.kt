@@ -1,53 +1,84 @@
 package com.example.proyectointermodular.controlador
 
-import com.example.proyectointermodular.modelo.Factura
+import com.example.proyectointermodular.modelo.FacturaEmitida
+import com.example.proyectointermodular.modelo.FacturaRecibida
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import androidx.navigation.NavHostController
 
 class FacturaRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
-    fun obtenerFacturas(onComplete: (List<Pair<String, Factura>>) -> Unit) {
-        db.collection("facturas").addSnapshotListener { snapshot, e ->
-            if (e != null) {
-                println("Error al obtener los facturas: ${e.message}")
-                return@addSnapshotListener
-            }
+    // Colecciones en Firestore
+    private val facturasEmitidasRef = db.collection("facturasEmitidas")
+    private val facturasRecibidasRef = db.collection("facturasRecibidas")
 
-            if (snapshot != null) {
-                val facturas = snapshot.documents.mapNotNull { document ->
-                    val factura = document.toObject(Factura::class.java)
-                    factura?.let { document.id to it }
-                }
-                onComplete(facturas)
-            }
-        }
+    suspend fun obtenerProximoNumeroFactura(): Int {
+        val snapshot = facturasEmitidasRef
+            .orderBy("numeroFactura", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(1)
+            .get()
+            .await()
+
+        return if (snapshot.isEmpty) 1 else (snapshot.documents.first().getLong("numeroFactura")?.toInt() ?: 1) + 1
     }
 
-    suspend fun eliminarFactura(idFactura: String) {
-        try {
-            db.collection("facturas").document(idFactura).delete().await()
-            println("Factura eliminado con éxito")
-        } catch (e: Exception) {
-            println("Error al eliminar factura: ${e.message}")
-        }
+    // Métodos para Facturas Emitidas
+    suspend fun agregarFacturaEmitida(factura: FacturaEmitida, navHostController: NavHostController) {
+        val numeroFactura = obtenerProximoNumeroFactura() // Obtiene el siguiente número autoincrementado
+        val documentRef = facturasEmitidasRef.document() // Genera ID automático en Firestore
+        val nuevaFactura = factura.copy(id = documentRef.id, numeroFactura = numeroFactura)
+
+        documentRef.set(nuevaFactura).await() // Guarda en Firestore
+        navHostController.navigate("PantallaFacturasEmitidas") // Navega de vuelta a PantallaFacturasEmitidas
     }
 
-    suspend fun agregarFactura(factura: Factura): String {
+    suspend fun obtenerFacturasEmitidas(): List<FacturaEmitida> {
         return try {
-            val docRef = db.collection("facturas").add(factura).await()
-            docRef.id
+            val snapshot = facturasEmitidasRef.get().await()
+            snapshot.toObjects(FacturaEmitida::class.java)
         } catch (e: Exception) {
-            throw Exception("Error al agregar factura: ${e.message}")
+            emptyList()
         }
     }
 
-    suspend fun actualizarFactura(idDocumento: String, factura: Factura) {
-        try {
-            db.collection("facturas").document(idDocumento).set(factura).await()
-        } catch (e: Exception) {
-            throw Exception("Error al actualizar factura: ${e.message}")
+    suspend fun actualizarFacturaEmitida(factura: FacturaEmitida) {
+        if (!factura.id.isNullOrEmpty()) {
+            facturasEmitidasRef.document(factura.id).set(factura.copy(id = factura.id)).await()
         }
+    }
+
+    suspend fun eliminarFacturaEmitida(id: String) {
+        facturasEmitidasRef.document(id).delete().await()
+    }
+
+    // Métodos para Facturas Recibidas
+    suspend fun agregarFacturaRecibida(factura: FacturaRecibida, navHostController: NavHostController) {
+        val numeroFactura = obtenerProximoNumeroFactura() // Obtiene el siguiente número autoincrementado
+        val documentRef = facturasRecibidasRef.document() // Genera ID automático en Firestore
+        val nuevaFactura = factura.copy(id = documentRef.id, numeroFactura = numeroFactura)
+
+        documentRef.set(nuevaFactura).await() // Guarda en Firestore
+        navHostController.navigate("PantallaFacturasEmitidas") // Navega de vuelta a PantallaFacturasEmitidas
+    }
+
+    suspend fun obtenerFacturasRecibidas(): List<FacturaRecibida> {
+        return try {
+            val snapshot = facturasRecibidasRef.get().await()
+            snapshot.toObjects(FacturaRecibida::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun actualizarFacturaRecibida(factura: FacturaRecibida) {
+        if (!factura.id.isNullOrEmpty()) {
+            facturasRecibidasRef.document(factura.id).set(factura.copy(id = factura.id)).await()
+        }
+    }
+
+    suspend fun eliminarFacturaRecibida(id: String) {
+        facturasRecibidasRef.document(id).delete().await()
     }
 }
