@@ -1,6 +1,7 @@
 package com.example.proyectointermodular.controlador
 
 import com.example.proyectointermodular.modelo.FacturaEmitida
+import com.example.proyectointermodular.modelo.FacturaRecibida
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -8,46 +9,51 @@ class FacturaRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
-    fun obtenerFacturas(onComplete: (List<Pair<String, FacturaEmitida>>) -> Unit) {
-        db.collection("facturas").addSnapshotListener { snapshot, e ->
-            if (e != null) {
-                println("Error al obtener los facturas: ${e.message}")
-                return@addSnapshotListener
-            }
+    // Colecciones en Firestore
+    private val facturasEmitidasRef = db.collection("facturasEmitidas")
+    private val facturasRecibidasRef = db.collection("facturasRecibidas")
 
-            if (snapshot != null) {
-                val facturas = snapshot.documents.mapNotNull { document ->
-                    val facturaEmitida = document.toObject(FacturaEmitida::class.java)
-                    facturaEmitida?.let { document.id to it }
-                }
-                onComplete(facturas)
-            }
-        }
+    // Métodos para Facturas Emitidas
+    suspend fun agregarFacturaEmitida(factura: FacturaEmitida) {
+        facturasEmitidasRef.document(factura.id).set(factura).await()
     }
 
-    suspend fun eliminarFactura(idFactura: String) {
-        try {
-            db.collection("facturas").document(idFactura).delete().await()
-            println("Factura eliminado con éxito")
-        } catch (e: Exception) {
-            println("Error al eliminar factura: ${e.message}")
-        }
-    }
-
-    suspend fun agregarFactura(facturaEmitida: FacturaEmitida): String {
+    suspend fun obtenerFacturasEmitidas(): List<FacturaEmitida> {
         return try {
-            val docRef = db.collection("facturas").add(facturaEmitida).await()
-            docRef.id
+            val snapshot = facturasEmitidasRef.get().await()
+            snapshot.toObjects(FacturaEmitida::class.java)
         } catch (e: Exception) {
-            throw Exception("Error al agregar factura: ${e.message}")
+            emptyList()
         }
     }
 
-    suspend fun actualizarFactura(idDocumento: String, facturaEmitida: FacturaEmitida) {
-        try {
-            db.collection("facturas").document(idDocumento).set(facturaEmitida).await()
+    suspend fun actualizarFacturaEmitida(factura: FacturaEmitida) {
+        facturasEmitidasRef.document(factura.id).set(factura).await()
+    }
+
+    suspend fun eliminarFacturaEmitida(id: String) {
+        facturasEmitidasRef.document(id).delete().await()
+    }
+
+    // Métodos para Facturas Recibidas
+    suspend fun agregarFacturaRecibida(factura: FacturaRecibida) {
+        facturasRecibidasRef.document(factura.id).set(factura).await()
+    }
+
+    suspend fun obtenerFacturasRecibidas(): List<FacturaRecibida> {
+        return try {
+            val snapshot = facturasRecibidasRef.get().await()
+            snapshot.toObjects(FacturaRecibida::class.java)
         } catch (e: Exception) {
-            throw Exception("Error al actualizar factura: ${e.message}")
+            emptyList()
         }
+    }
+
+    suspend fun actualizarFacturaRecibida(factura: FacturaRecibida) {
+        facturasRecibidasRef.document(factura.id).set(factura).await()
+    }
+
+    suspend fun eliminarFacturaRecibida(id: String) {
+        facturasRecibidasRef.document(id).delete().await()
     }
 }

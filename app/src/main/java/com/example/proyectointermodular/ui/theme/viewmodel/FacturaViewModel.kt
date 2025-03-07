@@ -1,101 +1,78 @@
-package com.example.proyectointermodular.ui.theme.viewmodel
+package com.example.proyectointermodular.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.proyectointermodular.controlador.FacturaRepository
 import com.example.proyectointermodular.modelo.FacturaEmitida
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.example.proyectointermodular.modelo.FacturaRecibida
+import com.example.proyectointermodular.controlador.FacturaRepository
 import kotlinx.coroutines.launch
 
 class FacturaViewModel : ViewModel() {
 
-    private val facturaRepository = FacturaRepository()
+    private val repository = FacturaRepository()
 
-    // Flujo para mantener la lista de facturas
-    private val _facturas = MutableStateFlow<List<Pair<String, FacturaEmitida>>>(emptyList())
-    val facturas: StateFlow<List<Pair<String, FacturaEmitida>>> get() = _facturas
+    // LiveData para Facturas Emitidas
+    private val _facturasEmitidas = MutableLiveData<List<FacturaEmitida>>()
+    val facturasEmitidas: LiveData<List<FacturaEmitida>> get() = _facturasEmitidas
 
-    private val _cargando = MutableStateFlow(true)
-    val cargando: StateFlow<Boolean> get() = _cargando
+    // LiveData para Facturas Recibidas
+    private val _facturasRecibidas = MutableLiveData<List<FacturaRecibida>>()
+    val facturasRecibidas: LiveData<List<FacturaRecibida>> get() = _facturasRecibidas
 
     init {
-        cargarFacturasEnTiempoReal()
+        cargarFacturas()
     }
 
-    private fun cargarFacturasEnTiempoReal() {
-        facturaRepository.obtenerFacturas { facturasObtenidos ->
-            _facturas.value = facturasObtenidos
-            _cargando.value = false  // Se cambia el estado de carga cuando se completan los datos
-        }
-    }
-
-    // Elimina una factura por su ID
-    fun eliminarFactura(id: String) {
+    private fun cargarFacturas() {
         viewModelScope.launch {
-            try {
-                // Verifica si la factura existe antes de intentar eliminarla
-                val facturaExistente = _facturas.value.any { it.first == id }
-                if (!facturaExistente) {
-                    println("Error: La factura con ID $id no existe.")
-                    return@launch
-                }
-
-                facturaRepository.eliminarFactura(id)
-                // Actualiza la lista local después de eliminar
-                _facturas.value = _facturas.value.filter { it.first != id }
-            } catch (e: Exception) {
-                println("Error al eliminar factura: ${e.message}")
-            }
+            _facturasEmitidas.value = repository.obtenerFacturasEmitidas()
+            _facturasRecibidas.value = repository.obtenerFacturasRecibidas()
         }
     }
 
-    fun agregarFactura(facturaEmitida: FacturaEmitida) {
+    // Métodos para Facturas Emitidas
+    fun agregarFacturaEmitida(factura: FacturaEmitida) {
         viewModelScope.launch {
-            try {
-                val nuevoId = facturaRepository.agregarFactura(facturaEmitida)
-                // Actualiza la factura con el nuevo ID y la añade a la lista local
-                val facturaConId = facturaEmitida.copy(id = nuevoId)
-                _facturas.value = _facturas.value + (nuevoId to facturaConId)
-            } catch (e: Exception) {
-                println("Error al agregar factura: ${e.message}")
-            }
+            repository.agregarFacturaEmitida(factura)
+            _facturasEmitidas.value = repository.obtenerFacturasEmitidas()
         }
     }
 
-    fun actualizarFactura(id: String, facturaEmitidaActualizado: FacturaEmitida) {
+    fun actualizarFacturaEmitida(factura: FacturaEmitida) {
         viewModelScope.launch {
-            try {
-                // Verifica si la factura existe antes de intentar actualizarla
-                val facturaExistente = _facturas.value.find { it.first == id }
-                if (facturaExistente == null) {
-                    println("Error: No se encontró factura con ID $id. Facturas disponibles:")
-                    _facturas.value.forEach { println("Factura ID: ${it.first}, Factura: ${it.second}") }
-                    return@launch
-                }
-
-                // Actualiza la factura en el repositorio
-                facturaRepository.actualizarFactura(id, facturaEmitidaActualizado)
-                println("Factura con ID $id actualizado en el repositorio.")
-
-                // Actualiza la lista local con la factura actualizada
-                _facturas.value = _facturas.value.map {
-                    if (it.first == id) id to facturaEmitidaActualizado else it
-                }
-                println("Lista local de facturas actualizada: $_facturas")
-
-            } catch (e: Exception) {
-                println("Error al actualizar factura: ${e.message}")
-            }
+            repository.actualizarFacturaEmitida(factura)
+            _facturasEmitidas.value = repository.obtenerFacturasEmitidas()
         }
     }
 
-    fun obtenerFacturaPorId(id: String): FacturaEmitida? {
-        println("Buscando factura con ID: $id")
-        println("Facturas disponibles:")
-        _facturas.value.forEach { println("ID: ${it.first}, Factura: ${it.second}") }
-
-        return _facturas.value.find { it.first == id }?.second
+    fun eliminarFacturaEmitida(id: String) {
+        viewModelScope.launch {
+            repository.eliminarFacturaEmitida(id)
+            _facturasEmitidas.value = repository.obtenerFacturasEmitidas()
+        }
     }
-    
+
+    // Métodos para Facturas Recibidas
+    fun agregarFacturaRecibida(factura: FacturaRecibida) {
+        viewModelScope.launch {
+            repository.agregarFacturaRecibida(factura)
+            _facturasRecibidas.value = repository.obtenerFacturasRecibidas()
+        }
+    }
+
+    fun actualizarFacturaRecibida(factura: FacturaRecibida) {
+        viewModelScope.launch {
+            repository.actualizarFacturaRecibida(factura)
+            _facturasRecibidas.value = repository.obtenerFacturasRecibidas()
+        }
+    }
+
+    fun eliminarFacturaRecibida(id: String) {
+        viewModelScope.launch {
+            repository.eliminarFacturaRecibida(id)
+            _facturasRecibidas.value = repository.obtenerFacturasRecibidas()
+        }
+    }
 }

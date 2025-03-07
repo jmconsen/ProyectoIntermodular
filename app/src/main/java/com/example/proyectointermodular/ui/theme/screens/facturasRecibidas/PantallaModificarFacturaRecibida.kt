@@ -38,7 +38,6 @@ import com.example.proyectointermodular.ui.theme.AzulClaro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.ui.theme.GrisOscuro2
 import com.example.proyectointermodular.ui.theme.Negro
-import com.example.proyectointermodular.ui.theme.viewmodel.FacturaRecibidaViewModel
 
 @Composable
 fun PantallaModificarFacturaRecibida(

@@ -10,7 +10,6 @@ import com.example.proyectointermodular.ui.theme.screens.PantallaMenu
 import com.example.proyectointermodular.ui.theme.screens.PantallaRegistro
 import com.example.proyectointermodular.ui.theme.screens.facturas.PantallaFormularioFacturas
 import com.example.proyectointermodular.ui.theme.screens.facturasRecibidas.PantallaFormularioFacturasRecibidas
-import com.example.proyectointermodular.ui.theme.viewmodel.FacturaRecibidaViewModel
 import com.example.proyectointermodular.ui.theme.viewmodel.FacturaViewModel
 
 @Composable

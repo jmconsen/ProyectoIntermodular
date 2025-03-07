@@ -46,7 +46,6 @@ import com.example.proyectointermodular.ui.theme.AzulClaro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.ui.theme.Negro
 import com.example.proyectointermodular.ui.theme.Rojizo
-import com.example.proyectointermodular.ui.theme.viewmodel.FacturaRecibidaViewModel
 //import com.example.proyectointermodular.ui.theme.viewmodel.FacturaViewModel
 import kotlinx.coroutines.delay
 
