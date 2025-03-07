@@ -52,9 +52,9 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
                         color = GrisOscuro2
                     )
                 },
-                selected = currentRoute == "PantallaFormularioFacturas",
+                selected = currentRoute == "PantallaFacturasEmitidas",
                 onClick = {
-                    navController.navigate("PantallaFormularioFacturasEmitidas") {
+                    navController.navigate("PantallaFacturasEmitidas") {
                         popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
@@ -77,9 +77,9 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
                         color = GrisOscuro2
                     )
                 },
-                selected = currentRoute == "PantallaFormularioFacturasRecibidas",
+                selected = currentRoute == "PantallaFacturasRecibidas",
                 onClick = {
-                    navController.navigate("PantallaFormularioFacturasRecibidas") {
+                    navController.navigate("PantallaFacturasRecibidas") {
                         popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true

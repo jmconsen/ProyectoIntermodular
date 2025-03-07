@@ -1,4 +1,4 @@
-package com.example.proyectointermodular.ui.theme.screens.facturasEmitidas
+package com.example.proyectointermodular.ui.theme.screens.facturasRecibidas
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,7 +18,7 @@ import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.viewmodel.FacturaViewModel
 
 @Composable
-fun PantallaModificarFacturaEmitida(
+fun PantallaModificarFacturaRecibida(
     id: String?,
     navHostController: NavHostController,
     facturaViewModel: FacturaViewModel = viewModel()
@@ -28,7 +28,7 @@ fun PantallaModificarFacturaEmitida(
         return
     }
 
-    val facturaExistente = facturaViewModel.facturasEmitidas.value?.find { it.id == id }
+    val facturaExistente = facturaViewModel.facturasRecibidas.value?.find { it.id == id }
 
     if (facturaExistente == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -39,12 +39,14 @@ fun PantallaModificarFacturaEmitida(
 
     // Estado de los valores editables
     var descripcion by remember { mutableStateOf(facturaExistente.descripcion) }
-    var fechaEmision by remember { mutableStateOf(facturaExistente.fechaEmision) }
-    var nombreReceptor by remember { mutableStateOf(facturaExistente.nombreReceptor) }
-    var cifReceptor by remember { mutableStateOf(facturaExistente.cifReceptor) }
-    var direccionReceptor by remember { mutableStateOf(facturaExistente.direccionReceptor) }
+    var fechaRecepcion by remember { mutableStateOf(facturaExistente.fechaRecepcion) }
+    var nombreEmisor by remember { mutableStateOf(facturaExistente.nombreEmisor) }
+    var cifEmisor by remember { mutableStateOf(facturaExistente.cifEmisor) }
+    var direccionEmisor by remember { mutableStateOf(facturaExistente.direccionEmisor) }
     var baseImponible by remember { mutableStateOf(facturaExistente.baseImponible.toString()) }
     var tipoIva by remember { mutableStateOf(facturaExistente.tipoIva.toString()) }
+    var fechaPago by remember { mutableStateOf(facturaExistente.fechaPago ?: "") }
+    var metodoPago by remember { mutableStateOf(facturaExistente.metodoPago ?: "") }
     var estado by remember { mutableStateOf(facturaExistente.estado) }
 
     // Calculado automáticamente
@@ -62,7 +64,7 @@ fun PantallaModificarFacturaEmitida(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text("Editar Factura", style = MaterialTheme.typography.headlineMedium)
+            Text("Editar Factura Recibida", style = MaterialTheme.typography.headlineMedium)
 
             OutlinedTextField(
                 value = descripcion,
@@ -72,30 +74,30 @@ fun PantallaModificarFacturaEmitida(
             )
 
             OutlinedTextField(
-                value = fechaEmision,
-                onValueChange = { fechaEmision = it },
-                label = { Text("Fecha de emisión") },
+                value = fechaRecepcion,
+                onValueChange = { fechaRecepcion = it },
+                label = { Text("Fecha de Recepción") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
-                value = nombreReceptor,
-                onValueChange = { nombreReceptor = it },
-                label = { Text("Nombre del Cliente") },
+                value = nombreEmisor,
+                onValueChange = { nombreEmisor = it },
+                label = { Text("Nombre del Emisor") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
-                value = cifReceptor,
-                onValueChange = { cifReceptor = it },
-                label = { Text("CIF del Cliente") },
+                value = cifEmisor,
+                onValueChange = { cifEmisor = it },
+                label = { Text("CIF del Emisor") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
-                value = direccionReceptor,
-                onValueChange = { direccionReceptor = it },
-                label = { Text("Dirección del Cliente") },
+                value = direccionEmisor,
+                onValueChange = { direccionEmisor = it },
+                label = { Text("Dirección del Emisor") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -113,6 +115,20 @@ fun PantallaModificarFacturaEmitida(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            OutlinedTextField(
+                value = fechaPago,
+                onValueChange = { fechaPago = it },
+                label = { Text("Fecha de Pago (Opcional)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = metodoPago,
+                onValueChange = { metodoPago = it },
+                label = { Text("Método de Pago (Opcional)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Text("Cuota IVA: ${"%.2f".format(cuotaIva)}€")
             Text("Total: ${"%.2f".format(total)}€")
 
@@ -127,17 +143,19 @@ fun PantallaModificarFacturaEmitida(
                 onClick = {
                     val facturaActualizada = facturaExistente.copy(
                         descripcion = descripcion,
-                        fechaEmision = fechaEmision,
-                        nombreReceptor = nombreReceptor,
-                        cifReceptor = cifReceptor,
-                        direccionReceptor = direccionReceptor,
+                        fechaRecepcion = fechaRecepcion,
+                        nombreEmisor = nombreEmisor,
+                        cifEmisor = cifEmisor,
+                        direccionEmisor = direccionEmisor,
                         baseImponible = baseImponible.toDoubleOrNull() ?: 0.0,
                         tipoIva = tipoIva.toDoubleOrNull() ?: 0.0,
                         cuotaIva = cuotaIva,
                         total = total,
-                        estado = estado
+                        estado = estado,
+                        fechaPago = fechaPago.ifBlank { null },
+                        metodoPago = metodoPago.ifBlank { null }
                     )
-                    facturaViewModel.actualizarFacturaEmitida(facturaActualizada)
+                    facturaViewModel.actualizarFacturaRecibida(facturaActualizada)
                     mostrarDialogoExito = true
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
