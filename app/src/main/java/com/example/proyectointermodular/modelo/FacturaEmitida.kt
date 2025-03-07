@@ -7,12 +7,7 @@ data class FacturaEmitida(
     var descripcion: String = "",
     var fechaEmision: String = "",
 
-    // Información del Emisor (Tu empresa)
-    val nombreEmisor: String = "",
-    val cifEmisor: String = "",
-    val direccionEmisor: String = "",
-
-    // Información del Receptor (El Cliente)
+    // Información del Cliente (Receptor)
     val nombreReceptor: String = "",
     val cifReceptor: String = "",
     val direccionReceptor: String = "",
@@ -24,6 +19,10 @@ data class FacturaEmitida(
     val total: Double = 0.0,
 
     // Estado de la factura
-    val estado: String = "Pendiente" // Puede ser: Pendiente, Pagada, Cancelada
-
-)
+    val estado: String = "Pendiente"
+) {
+    // Los datos del emisor siempre son los de la empresa
+    val nombreEmisor: String = Empresa.NOMBRE
+    val cifEmisor: String = Empresa.CIF
+    val direccionEmisor: String = Empresa.DIRECCION
+}

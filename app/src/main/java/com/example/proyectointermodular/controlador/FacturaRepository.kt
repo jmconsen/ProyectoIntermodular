@@ -15,7 +15,12 @@ class FacturaRepository {
 
     // Métodos para Facturas Emitidas
     suspend fun agregarFacturaEmitida(factura: FacturaEmitida) {
-        facturasEmitidasRef.document(factura.id).set(factura).await()
+        val documentRef = if (factura.id.isNullOrEmpty()) {
+            facturasEmitidasRef.document()
+        } else {
+            facturasEmitidasRef.document(factura.id)
+        }
+        documentRef.set(factura).await()
     }
 
     suspend fun obtenerFacturasEmitidas(): List<FacturaEmitida> {
@@ -28,7 +33,9 @@ class FacturaRepository {
     }
 
     suspend fun actualizarFacturaEmitida(factura: FacturaEmitida) {
-        facturasEmitidasRef.document(factura.id).set(factura).await()
+        if (!factura.id.isNullOrEmpty()) {
+            facturasEmitidasRef.document(factura.id).set(factura).await()
+        }
     }
 
     suspend fun eliminarFacturaEmitida(id: String) {
@@ -37,7 +44,12 @@ class FacturaRepository {
 
     // Métodos para Facturas Recibidas
     suspend fun agregarFacturaRecibida(factura: FacturaRecibida) {
-        facturasRecibidasRef.document(factura.id).set(factura).await()
+        val documentRef = if (factura.id.isNullOrEmpty()) {
+            facturasRecibidasRef.document()
+        } else {
+            facturasRecibidasRef.document(factura.id)
+        }
+        documentRef.set(factura).await()
     }
 
     suspend fun obtenerFacturasRecibidas(): List<FacturaRecibida> {
@@ -50,7 +62,9 @@ class FacturaRepository {
     }
 
     suspend fun actualizarFacturaRecibida(factura: FacturaRecibida) {
-        facturasRecibidasRef.document(factura.id).set(factura).await()
+        if (!factura.id.isNullOrEmpty()) {
+            facturasRecibidasRef.document(factura.id).set(factura).await()
+        }
     }
 
     suspend fun eliminarFacturaRecibida(id: String) {
