@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.proyectointermodular.modelo.FacturaEmitida
 import com.example.proyectointermodular.modelo.FacturaRecibida
 import com.example.proyectointermodular.controlador.FacturaRepository
@@ -33,9 +34,9 @@ class FacturaViewModel : ViewModel() {
     }
 
     // Métodos para Facturas Emitidas
-    fun agregarFacturaEmitida(factura: FacturaEmitida) {
+    fun agregarFacturaEmitida(factura: FacturaEmitida, navHostController: NavHostController) {
         viewModelScope.launch {
-            repository.agregarFacturaEmitida(factura)
+            repository.agregarFacturaEmitida(factura, navHostController)
             _facturasEmitidas.value = repository.obtenerFacturasEmitidas()
         }
     }
@@ -55,9 +56,9 @@ class FacturaViewModel : ViewModel() {
     }
 
     // Métodos para Facturas Recibidas
-    fun agregarFacturaRecibida(factura: FacturaRecibida) {
+    fun agregarFacturaRecibida(factura: FacturaRecibida, navHostController: NavHostController) {
         viewModelScope.launch {
-            repository.agregarFacturaRecibida(factura)
+            repository.agregarFacturaRecibida(factura, navHostController)
             _facturasRecibidas.value = repository.obtenerFacturasRecibidas()
         }
     }

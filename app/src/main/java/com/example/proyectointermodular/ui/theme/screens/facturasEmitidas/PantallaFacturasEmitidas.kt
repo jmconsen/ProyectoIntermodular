@@ -115,7 +115,7 @@ fun PantallaFacturasEmitidas(
                     modifier = Modifier.fillMaxWidth().padding(16.dp)
                 )
                 val filteredFacturas = facturas.filter {
-                    it.numeroFactura.contains(searchQuery.text, ignoreCase = true)
+                    it.numeroFactura.toString().contains(searchQuery.text, ignoreCase = true)
                 }
                 if (filteredFacturas.isNotEmpty()) {
                     LazyColumn(modifier = Modifier.weight(1f).padding(16.dp)) {

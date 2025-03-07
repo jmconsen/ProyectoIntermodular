@@ -19,8 +19,9 @@ fun PantallaAddFacturaEmitida(
     navHostController: NavHostController,
     facturaViewModel: FacturaViewModel = viewModel())
 {
-    val scaffoldState = rememberScaffoldState()
-    var numeroFactura by remember { mutableStateOf("") }
+    val snackbarHostState = remember { SnackbarHostState() }
+    var facturaGuardada by remember { mutableStateOf(false) }
+    // var numeroFactura by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var fechaEmision by remember { mutableStateOf("") }
     var nombreReceptor by remember { mutableStateOf("") }
@@ -35,7 +36,7 @@ fun PantallaAddFacturaEmitida(
     val total = baseImponible + cuotaIva
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = remember { SnackbarHostState() }) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -43,11 +44,7 @@ fun PantallaAddFacturaEmitida(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            OutlinedTextField(
-                value = numeroFactura,
-                onValueChange = { numeroFactura = it },
-                label = { Text("Número de Factura") }
-            )
+            // OutlinedTextField for numeroFactura removed
             OutlinedTextField(
                 value = descripcion,
                 onValueChange = { descripcion = it },
@@ -87,13 +84,12 @@ fun PantallaAddFacturaEmitida(
             Text(text = "Total: $total")
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = {
-                if (numeroFactura.isNotBlank() && descripcion.isNotBlank() && fechaEmision.isNotBlank() &&
+                if (descripcion.isNotBlank() && fechaEmision.isNotBlank() &&
                     nombreReceptor.isNotBlank() && cifReceptor.isNotBlank() && direccionReceptor.isNotBlank() &&
                     baseImponibleText.isNotBlank() && tipoIvaText.isNotBlank()
                 ) {
                     val factura = FacturaEmitida(
                         id = "",
-                        numeroFactura = numeroFactura,
                         descripcion = descripcion,
                         fechaEmision = fechaEmision,
                         nombreReceptor = nombreReceptor,
@@ -105,15 +101,19 @@ fun PantallaAddFacturaEmitida(
                         total = total,
                         estado = "Pendiente"
                     )
-                    facturaViewModel.agregarFacturaEmitida(factura)
-                    CoroutineScope(Dispatchers.Main).launch {
-                        scaffoldState.snackbarHostState.showSnackbar("Factura creada exitosamente")
-                    }
+                    facturaViewModel.agregarFacturaEmitida(factura, navHostController)
+                    facturaGuardada = true
                 }
             }) {
                 Text("Guardar Factura")
             }
+            }
+            LaunchedEffect(facturaGuardada) {
+                if (facturaGuardada) {
+            snackbarHostState.showSnackbar("Factura creada exitosamente")
+                    facturaGuardada = false
+                }
+            }
         }
-    }
 }
 

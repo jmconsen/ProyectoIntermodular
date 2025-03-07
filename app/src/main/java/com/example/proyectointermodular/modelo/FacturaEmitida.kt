@@ -3,7 +3,7 @@ package com.example.proyectointermodular.modelo
 data class FacturaEmitida(
 
     var id: String = "",
-    val numeroFactura: String = "",
+    val numeroFactura: Int = 0,
     var descripcion: String = "",
     var fechaEmision: String = "",
 

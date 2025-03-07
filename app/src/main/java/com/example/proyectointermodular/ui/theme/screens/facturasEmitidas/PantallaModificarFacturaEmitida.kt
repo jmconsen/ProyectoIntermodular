@@ -3,12 +3,14 @@ package com.example.proyectointermodular.ui.theme.screens.facturasEmitidas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -64,10 +66,13 @@ fun PantallaModificarFacturaEmitida(
             Text("Editar Factura", style = MaterialTheme.typography.headlineMedium)
 
             OutlinedTextField(
-                value = numeroFactura,
-                onValueChange = { numeroFactura = it },
+                value = numeroFactura.toString(),  // Convertimos el número a String para mostrarlo
+                onValueChange = { nuevoValor ->
+                    numeroFactura = nuevoValor.toIntOrNull() ?: 0  // Convertimos de nuevo a Int
+                },
                 label = { Text("Número Factura") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number) // Forzar teclado numérico
             )
 
             OutlinedTextField(
