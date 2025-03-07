@@ -136,6 +136,32 @@ fun PantallaLogin(navHostController: NavHostController){
                                     currentUser?.let {
                                         mensajeError = "Bienvenido, ${it.email ?: "Usuario"}"
                                     }
+                                    navHostController.navigate(route = "PantallaMenu") { // Cambio aquí
+                                        popUpTo("PantallaLogin") { inclusive = true }
+                                    }
+                                } else {
+                                    mensajeError = task.exception?.message ?: "Error de inicio de sesión"
+                                }
+                            }
+                    } else {
+                        mensajeError = "Por favor, ingrese email y contraseña."
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            /*
+            BotonEstandar(
+                texto = "Iniciar Sesión",
+                onClick = {
+                    if (usuario.isNotBlank() && password.isNotBlank()) {
+                        auth.signInWithEmailAndPassword(usuario, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val currentUser = auth.currentUser
+                                    currentUser?.let {
+                                        mensajeError = "Bienvenido, ${it.email ?: "Usuario"}"
+                                    }
                                     navHostController.navigate(route = "PantallaDashboardVentas") {
                                         popUpTo("PantallaLogin") { inclusive = true }
                                     }
@@ -149,6 +175,9 @@ fun PantallaLogin(navHostController: NavHostController){
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+            */
+
+
             // LaunchedEffect para manejar la navegación después del mensaje de bienvenida
             LaunchedEffect(mensajeError) {
                 if (mensajeError.startsWith("Bienvenido")) {
