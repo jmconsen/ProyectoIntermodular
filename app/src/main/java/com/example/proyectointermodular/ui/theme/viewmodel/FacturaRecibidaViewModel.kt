@@ -3,7 +3,7 @@ package com.example.proyectointermodular.ui.theme.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.proyectointermodular.controlador.FacturaRecibidaRepository
-import com.example.proyectointermodular.modelo.Factura
+import com.example.proyectointermodular.modelo.FacturaEmitida
 import com.example.proyectointermodular.modelo.FacturaRecibida
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,8 +14,8 @@ class FacturaRecibidaViewModel : ViewModel() {
     private val facturaRecibidaRepository = FacturaRecibidaRepository()
 
     // Flujo para mantener la lista de facturas
-    private val _facturas = MutableStateFlow<List<Pair<String, Factura>>>(emptyList())
-    val facturas: StateFlow<List<Pair<String, Factura>>> get() = _facturas
+    private val _facturas = MutableStateFlow<List<Pair<String, FacturaEmitida>>>(emptyList())
+    val facturas: StateFlow<List<Pair<String, FacturaEmitida>>> get() = _facturas
 
     private val _cargando = MutableStateFlow(true)
     val cargando: StateFlow<Boolean> get() = _cargando
@@ -64,7 +64,7 @@ class FacturaRecibidaViewModel : ViewModel() {
         }
     }
 
-    fun actualizarFactura(id: String, facturaActualizado: Factura) {
+    fun actualizarFactura(id: String, facturaEmitidaActualizado: FacturaEmitida) {
         viewModelScope.launch {
             try {
                 // Verifica si la factura existe antes de intentar actualizarla
@@ -76,12 +76,12 @@ class FacturaRecibidaViewModel : ViewModel() {
                 }
 
                 // Actualiza la factura en el repositorio
-                facturaRecibidaRepository.actualizarFactura(id, facturaActualizado)
+                facturaRecibidaRepository.actualizarFactura(id, facturaEmitidaActualizado)
                 println("Factura con ID $id actualizado en el repositorio.")
 
                 // Actualiza la lista local con la factura actualizada
                 _facturas.value = _facturas.value.map {
-                    if (it.first == id) id to facturaActualizado else it
+                    if (it.first == id) id to facturaEmitidaActualizado else it
                 }
                 println("Lista local de facturas actualizada: $_facturas")
 
@@ -91,7 +91,7 @@ class FacturaRecibidaViewModel : ViewModel() {
         }
     }
 
-    fun obtenerFacturaPorId(id: String): Factura? {
+    fun obtenerFacturaPorId(id: String): FacturaEmitida? {
         println("Buscando factura con ID: $id")
         println("Facturas disponibles:")
         _facturas.value.forEach { println("ID: ${it.first}, Factura: ${it.second}") }

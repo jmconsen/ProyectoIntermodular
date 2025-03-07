@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.proyectointermodular.componentes.BotonEstandar
-import com.example.proyectointermodular.modelo.Factura
+import com.example.proyectointermodular.modelo.FacturaEmitida
 import com.example.proyectointermodular.ui.theme.AzulClaro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.ui.theme.GrisOscuro2
@@ -341,7 +341,7 @@ fun PantallaAddFacturaCopy(
 
                     )
                     if (esValido) {
-                        val nuevaFactura = Factura(
+                        val nuevaFacturaEmitida = FacturaEmitida(
                             numeroFactura = numeroFactura,
                             descFactura = descFactura,
                             fechaFactura = fechaFactura,
@@ -357,7 +357,7 @@ fun PantallaAddFacturaCopy(
                             total = total
                         )
 
-                        facturaViewModel.agregarFactura(nuevaFactura)
+                        facturaViewModel.agregarFactura(nuevaFacturaEmitida)
                         mostrarDialogoExito = true
                     } else {
                         mensajeErrorValidacion = mensaje ?: "Error de validación"

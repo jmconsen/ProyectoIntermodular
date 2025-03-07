@@ -41,7 +41,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.proyectointermodular.modelo.Factura
+import com.example.proyectointermodular.modelo.FacturaEmitida
 import com.example.proyectointermodular.ui.theme.AzulClaro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.ui.theme.Negro
@@ -56,13 +56,13 @@ fun PantallaFormularioFacturas(
 ) {
     val facturas by facturaViewModel.facturas.collectAsState()
     var mensajeBorrado by remember { mutableStateOf("") }
-    var facturaAEliminar by remember { mutableStateOf<Pair<String, Factura>?>(null) }
+    var facturaEmitidaAEliminar by remember { mutableStateOf<Pair<String, FacturaEmitida>?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
     // Diálogo de confirmación para eliminar factura
-    facturaAEliminar?.let { (id, factura) ->
+    facturaEmitidaAEliminar?.let { (id, factura) ->
         AlertDialog(
-            onDismissRequest = { facturaAEliminar = null },
+            onDismissRequest = { facturaEmitidaAEliminar = null },
             title = { Text("Confirmación") },
             text = { Text("¿Estás seguro de que deseas eliminar la factura número '${factura.numeroFactura}'?") },
             confirmButton = {
@@ -70,14 +70,14 @@ fun PantallaFormularioFacturas(
                     onClick = {
                         facturaViewModel.eliminarFactura(id)
                         mensajeBorrado = "Factura eliminada correctamente"
-                        facturaAEliminar = null
+                        facturaEmitidaAEliminar = null
                     }
                 ) {
                     Text("Eliminar")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { facturaAEliminar = null }) {
+                TextButton(onClick = { facturaEmitidaAEliminar = null }) {
                     Text("Cancelar")
                 }
             }
@@ -159,12 +159,12 @@ fun PantallaFormularioFacturas(
                 ) {
                     items(filteredFacturas) { (id, factura) ->
                         FacturaItem(
-                            factura = factura,
+                            facturaEmitida = factura,
                             onEdit = {
                                 navHostController.navigate("PantallaModificarFactura/$id")
                             },
                             onDelete = {
-                                facturaAEliminar = id to factura
+                                facturaEmitidaAEliminar = id to factura
                             }
                         )
                     }
@@ -192,7 +192,7 @@ fun PantallaFormularioFacturas(
 
 @Composable
 fun FacturaItem(
-    factura: Factura,
+    facturaEmitida: FacturaEmitida,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -211,15 +211,15 @@ fun FacturaItem(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "${factura.numeroFactura}",
+                    text = "${facturaEmitida.numeroFactura}",
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = "Descripción Factura: ${factura.descFactura ?: "No especificado"}",
+                    text = "Descripción Factura: ${facturaEmitida.descFactura ?: "No especificado"}",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "Fecha Factura: ${factura.fechaFactura ?: "No especificado"}",
+                    text = "Fecha Factura: ${facturaEmitida.fechaFactura ?: "No especificado"}",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
