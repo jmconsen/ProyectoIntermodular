@@ -13,6 +13,10 @@ import com.example.proyectointermodular.ui.theme.screens.facturasEmitidas.Pantal
 import com.example.proyectointermodular.ui.theme.screens.facturasEmitidas.PantallaDetalleFacturaEmitida
 import com.example.proyectointermodular.ui.theme.screens.facturasEmitidas.PantallaFacturasEmitidas
 import com.example.proyectointermodular.ui.theme.screens.facturasEmitidas.PantallaModificarFacturaEmitida
+import com.example.proyectointermodular.ui.theme.screens.facturasRecibidas.PantallaAddFacturaRecibida
+import com.example.proyectointermodular.ui.theme.screens.facturasRecibidas.PantallaDetalleFacturaRecibida
+import com.example.proyectointermodular.ui.theme.screens.facturasRecibidas.PantallaFacturasRecibidas
+import com.example.proyectointermodular.ui.theme.screens.facturasRecibidas.PantallaModificarFacturaRecibida
 import com.example.proyectointermodular.viewmodel.FacturaViewModel
 
 @Composable
@@ -42,6 +46,22 @@ fun NavigationApp(
         }
         composable("PantallaAddFacturaEmitida") {
             PantallaAddFacturaEmitida(navHostController = navHostController, facturaViewModel = viewModel<FacturaViewModel>())
+        }
+
+        // Facturas Recibidas
+        composable("PantallaFacturasRecibidas") {
+            PantallaFacturasRecibidas(navHostController = navHostController, facturaViewModel = viewModel<FacturaViewModel>())
+        }
+        composable("PantallaDetalleFacturaRecibida/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            PantallaDetalleFacturaRecibida(id, navHostController)
+        }
+        composable("PantallaModificarFacturaRecibida/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            PantallaModificarFacturaRecibida(id, navHostController)
+        }
+        composable("PantallaAddFacturaRecibida") {
+            PantallaAddFacturaRecibida(navHostController = navHostController, facturaViewModel = viewModel<FacturaViewModel>())
         }
 
         // Login / Registro
