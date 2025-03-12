@@ -13,13 +13,17 @@ data class FacturaEmitida(
     val direccionReceptor: String = "",
 
     // Datos financieros
-    val baseImponible: Double = 0.0,
-    val tipoIva: Double = 0.0,
-    val cuotaIva: Double = 0.0,
-    val total: Double = 0.0,
+    val baseImponible: Double = 0.00,
+    val tipoIva: Double = 0.00,
+    val cuotaIva: Double = 0.00,
+    val total: Double = 0.00,
 
     // Estado de la factura
-    val estado: String = "Pendiente"
+    val estado: String = "Pendiente",
+
+    //Proyecto asociado
+    val proyecto: String = ""
+
 ) {
     // Los datos del emisor siempre son los de la empresa
     val nombreEmisor: String = Empresa.NOMBRE

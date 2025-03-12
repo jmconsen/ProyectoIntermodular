@@ -12,10 +12,10 @@ data class FacturaRecibida(
     val direccionEmisor: String = "",
 
     // Datos financieros
-    val baseImponible: Double = 0.0,
-    val tipoIva: Double = 0.0,
-    val cuotaIva: Double = 0.0,
-    val total: Double = 0.0,
+    val baseImponible: Double = 0.00,
+    val tipoIva: Double = 0.00,
+    val cuotaIva: Double = 0.00,
+    val total: Double = 0.00,
 
     // Estado de la factura
     val estado: String = "Pendiente",

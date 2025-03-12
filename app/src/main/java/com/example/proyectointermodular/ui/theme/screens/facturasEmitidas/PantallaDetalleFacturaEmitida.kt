@@ -2,6 +2,10 @@ package com.example.proyectointermodular.ui.theme.screens.facturasEmitidas
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,9 +15,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.proyectointermodular.modelo.FacturaEmitida
+import com.example.proyectointermodular.ui.theme.AzulOscuro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
+import com.example.proyectointermodular.ui.theme.GrisOscuro2
 import com.example.proyectointermodular.viewmodel.FacturaViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaDetalleFacturaEmitida(
     id: String?,
@@ -25,6 +32,7 @@ fun PantallaDetalleFacturaEmitida(
         return
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
     val factura = facturaViewModel.facturasEmitidas.value?.find { it.id == id }
 
     if (factura == null) {
@@ -34,26 +42,108 @@ fun PantallaDetalleFacturaEmitida(
         return
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-            .background(Brush.verticalGradient(colors = FondoPantallas))
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+
+        topBar = {
+            TopAppBar(
+                title = { Text("Detalle de la Factura") },
+                navigationIcon = {
+                    IconButton(onClick = { navHostController.popBackStack("PantallaFacturasEmitidas", inclusive = false) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = AzulOscuro
+                )
+            )
+        }
+
+    ) { padding ->
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .background(Brush.verticalGradient(colors = FondoPantallas))
         ) {
-            Text(text = "Detalles de la Factura", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Número: ${factura.numeroFactura}")
-            Text(text = "Descripción: ${factura.descripcion}")
-            Text(text = "Fecha de emisión: ${factura.fechaEmision}")
-            Text(text = "Cliente: ${factura.nombreReceptor}")
-            Text(text = "CIF Cliente: ${factura.cifReceptor}")
-            Text(text = "Total: ${factura.total}€")
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { navHostController.popBackStack() }) {
-                Text("Volver")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
+            ) {
+
+
+                /*
+                Text(
+                    text = "Detalles de la Factura",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = AzulOscuro
+                )
+                 */
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Información de la factura
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Número de Factura: ${factura.numeroFactura}", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "Fecha de Emisión: ${factura.fechaEmision}", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "Estado: ${factura.estado}", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider(color = GrisOscuro2, thickness = 1.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Datos del cliente
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Cliente: ${factura.nombreReceptor}", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "CIF Cliente: ${factura.cifReceptor}", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "Dirección Cliente: ${factura.direccionReceptor}", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider(color = GrisOscuro2, thickness = 1.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Descripción
+                Text(text = "Descripción: ${factura.descripcion}", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                Text(text = "Proyecto Facturado: ${factura.proyecto}", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider(color = GrisOscuro2, thickness = 1.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Información financiera
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = "Base Imponible: ${factura.baseImponible}€", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "Tipo IVA: ${factura.tipoIva}%", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "Cuota IVA: ${factura.cuotaIva}€", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "Total: ${factura.total}€", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Botón de volver
+                Button(
+                    onClick = { navHostController.popBackStack() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AzulOscuro
+                    )
+                ) {
+                    Text("Volver", color = MaterialTheme.colorScheme.onPrimary)
+                }
             }
         }
     }
