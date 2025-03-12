@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                 onSuccess = {
                     Log.d("MainActivity", "Inicio de sesión exitoso con Google.")
                     if (::navHostController.isInitialized) {
-                        navHostController.navigate("PantallaFormularioFacturas") {
+                        navHostController.navigate("PantallaMenu") {
                             popUpTo("PantallaLogin") { inclusive = true }
                         }
                     } else {

@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
@@ -44,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.proyectointermodular.modelo.FacturaEmitida
+import com.example.proyectointermodular.ui.theme.AzulOscuro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.ui.theme.Rojizo
 import com.example.proyectointermodular.viewmodel.FacturaViewModel
@@ -88,13 +91,18 @@ fun PantallaFacturasEmitidas(
         topBar = {
             TopAppBar(
                 title = { Text("Facturas Emitidas") },
+                navigationIcon = {
+                    IconButton(onClick = { navHostController.popBackStack("PantallaMenu", inclusive = false) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
                 actions = {
                     IconButton(onClick = { navHostController.navigate("PantallaAddFacturaEmitida") }) {
                         Icon(Icons.Filled.Add, contentDescription = "Añadir Factura")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = AzulOscuro
                 )
             )
         }

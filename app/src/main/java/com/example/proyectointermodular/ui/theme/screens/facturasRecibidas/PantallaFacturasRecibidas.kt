@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.proyectointermodular.modelo.FacturaRecibida
+import com.example.proyectointermodular.ui.theme.AzulOscuro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.ui.theme.Rojizo
 import com.example.proyectointermodular.viewmodel.FacturaViewModel
@@ -64,13 +66,18 @@ fun PantallaFacturasRecibidas(
         topBar = {
             TopAppBar(
                 title = { Text("Facturas Recibidas") },
+                navigationIcon = {
+                    IconButton(onClick = { navHostController.popBackStack("PantallaMenu", inclusive = false) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
                 actions = {
                     IconButton(onClick = { navHostController.navigate("PantallaAddFacturaRecibida") }) {
                         Icon(Icons.Filled.Add, contentDescription = "Añadir Factura")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = AzulOscuro
                 )
             )
         }
@@ -133,7 +140,7 @@ fun FacturaRecibidaItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = "Factura Nº: ${facturaRecibida.numeroFactura}")
                 Text(text = "Descripción: ${facturaRecibida.descripcion ?: "No especificado"}")
-                Text(text = "Fecha de Recepción: ${facturaRecibida.fechaRecepcion ?: "No especificado"}")
+                Text(text = "Fecha Recepción: ${facturaRecibida.fechaRecepcion ?: "No especificado"}")
             }
             IconButton(onClick = { onView() }) {
                 Icon(Icons.Filled.Visibility, contentDescription = "Ver detalles")

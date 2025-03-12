@@ -30,7 +30,7 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
     Surface(
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         shadowElevation = 6.dp,
-        modifier = Modifier.height(98.dp).padding(top = 10.dp)
+        modifier = Modifier.height(120.dp).padding(top = 10.dp)
     ) {
         NavigationBar(
             containerColor = AzulOscuro,
@@ -48,7 +48,7 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
                 },
                 label = {
                     Text(
-                        "Facturas emitidas",
+                        "Fact. Emitidas",
                         color = GrisOscuro2
                     )
                 },
@@ -73,7 +73,7 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
                 },
                 label = {
                     Text(
-                        "Facturas recibidas",
+                        "Fact. Recibidas",
                         color = GrisOscuro2
                     )
                 },
