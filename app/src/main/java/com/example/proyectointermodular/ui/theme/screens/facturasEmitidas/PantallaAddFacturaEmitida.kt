@@ -50,6 +50,7 @@ fun PantallaAddFacturaEmitida(
 
     var proyectos by remember { mutableStateOf(listOf<String>()) }
     var proyectoSeleccionado by remember { mutableStateOf("") }
+    var proyectoSeleccionadoId by remember { mutableStateOf("") }
     var expandedProyectos by remember { mutableStateOf(false) }
 
     val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
@@ -62,6 +63,7 @@ fun PantallaAddFacturaEmitida(
     }
 
      */
+    var proyectosMap by remember { mutableStateOf(mapOf<String, String>()) }
 
     // Obtener proyectos desde Firebase
     LaunchedEffect(Unit) {
@@ -69,7 +71,13 @@ fun PantallaAddFacturaEmitida(
         db.collection("proyectos")
             .get()
             .addOnSuccessListener { result ->
-                proyectos = result.map { it.getString("nombre") ?: "" }
+                val map = mutableMapOf<String, String>()
+                for (document in result) {
+                    val id = document.id
+                    val nombre = document.getString("nombre") ?: ""
+                    map[id] = nombre
+                }
+                proyectosMap = map
             }
             .addOnFailureListener { exception ->
                 CoroutineScope(Dispatchers.Main).launch {
@@ -226,11 +234,12 @@ fun PantallaAddFacturaEmitida(
                         expanded = expandedProyectos,
                         onDismissRequest = { expandedProyectos = false }
                     ) {
-                        proyectos.forEach { proyecto ->
+                        proyectosMap.forEach { (id, nombre) ->
                             DropdownMenuItem(
-                                text = { Text(proyecto) },
+                                text = { Text(nombre) },
                                 onClick = {
-                                    proyectoSeleccionado = proyecto
+                                    proyectoSeleccionado = nombre
+                                    proyectoSeleccionadoId = id
                                     expandedProyectos = false
                                 }
                             )
@@ -287,11 +296,12 @@ fun PantallaAddFacturaEmitida(
                                     direccionReceptor = direccionReceptor,
                                     baseImponible = baseImponibleText.toDouble(),
                                     //tipoIva = tipoIvaValue,
-                                    tipoIva = tipoIva.toDouble(),
+                                    tipoIva = tipoIva.replace("%", "").trim().toDouble(),
                                     cuotaIva = cuotaIva.toDouble(),
                                     total = total.toDouble(),
                                     estado = "Pendiente",
-                                    proyecto = proyectoSeleccionado
+                                    proyecto = proyectoSeleccionado,
+                                    proyectoId = proyectoSeleccionadoId
                                 )
                                 facturaViewModel.agregarFacturaEmitida(factura, navHostController)
                                 facturaGuardada = true
