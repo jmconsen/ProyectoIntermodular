@@ -70,9 +70,8 @@ fun PantallaAddFacturaEmitida(
         "10%" -> 10
         "4%" -> 4
         else -> 0
+    }
 
-     */
-      /*
     var proyectosMap by remember { mutableStateOf(mapOf<String, String>()) }
 
     // Obtener proyectos desde Firebase
@@ -94,9 +93,9 @@ fun PantallaAddFacturaEmitida(
                     snackbarHostState.showSnackbar("Error al obtener proyectos: ${exception.message}")
                 }
             }
-            */
-
     }
+
+
 
     // Calcular cuota IVA de forma reactiva y Formatear con coma decimal (formato España)
     val cuotaIva by remember(baseImponibleText, tipoIva) {
@@ -120,7 +119,7 @@ fun PantallaAddFacturaEmitida(
             numberFormat.format(base + cuota)
         }
     }
-
+/*
     // Obtener proyectos desde Firebase
     LaunchedEffect(Unit) {
         val db = FirebaseFirestore.getInstance()
@@ -135,7 +134,7 @@ fun PantallaAddFacturaEmitida(
                 }
             }
     }
-
+*/
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
 
@@ -345,7 +344,6 @@ fun PantallaAddFacturaEmitida(
                         Text("Guardar")
                     }
                 }
-
                 Spacer(modifier = Modifier.height(64.dp))
 
                 LaunchedEffect(facturaGuardada) {
