@@ -24,6 +24,17 @@ class FacturaRepository {
         return if (snapshot.isEmpty) 1 else (snapshot.documents.first().getLong("numeroFactura")?.toInt() ?: 1) + 1
     }
 
+    /** 🔹 Obtiene el siguiente número de factura recibida (Nueva función) */
+    suspend fun obtenerProximoNumeroFacturaRecibida(): Int {
+        val snapshot = facturasRecibidasRef
+            .orderBy("numeroFactura", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(1)
+            .get()
+            .await()
+
+        return if (snapshot.isEmpty) 1 else (snapshot.documents.first().getLong("numeroFactura")?.toInt() ?: 1) + 1
+    }
+
     // Métodos para Facturas Emitidas
     suspend fun agregarFacturaEmitida(factura: FacturaEmitida, navHostController: NavHostController) {
         val numeroFactura = obtenerProximoNumeroFactura() // Obtiene el siguiente número autoincrementado
@@ -55,7 +66,7 @@ class FacturaRepository {
 
     // Métodos para Facturas Recibidas
     suspend fun agregarFacturaRecibida(factura: FacturaRecibida, navHostController: NavHostController) {
-        val numeroFactura = obtenerProximoNumeroFactura() // Obtiene el siguiente número autoincrementado
+        val numeroFactura = obtenerProximoNumeroFacturaRecibida() // Obtiene el siguiente número autoincrementado
         val documentRef = facturasRecibidasRef.document() // Genera ID automático en Firestore
         val nuevaFactura = factura.copy(id = documentRef.id, numeroFactura = numeroFactura)
 

@@ -97,9 +97,9 @@ fun PantallaFacturasRecibidas(
                     placeholder = { Text("Buscar por número de factura") },
                     modifier = Modifier.fillMaxWidth().padding(16.dp)
                 )
-                val filteredFacturas = facturas.filter {
-                    it.numeroFactura.toString().contains(searchQuery.text, ignoreCase = true)
-                }
+                val filteredFacturas = facturas
+                    .filter {it.numeroFactura.toString().contains(searchQuery.text, ignoreCase = true)
+                }.sortedByDescending { it.numeroFactura }
                 if (filteredFacturas.isNotEmpty()) {
                     LazyColumn(modifier = Modifier.weight(1f).padding(16.dp)) {
                         items(filteredFacturas) { factura ->

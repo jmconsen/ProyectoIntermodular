@@ -341,7 +341,7 @@ fun PantallaAddFacturaEmitida(
                     Button(
                         onClick = {
                             val (esValido, mensajeError) = validarCamposFacturaAdd(
-                                numeroFactura = "1",
+                                numeroFactura = "",
                                 descripcion = descripcion,
                                 fechaEmision = fechaEmision,
                                 nombreReceptor = nombreReceptor,
@@ -452,12 +452,12 @@ fun validarCamposFacturaAdd(
 
 ): Pair<Boolean, String?> {
     // Validación de campos obligatorios y longitud máxima
-    if (numeroFactura.isBlank() || descripcion.isBlank() ||
+    if (descripcion.isBlank() ||
         fechaEmision.isBlank() || nombreReceptor.isBlank() ||
         cifReceptor.isBlank() || direccionReceptor.isBlank() ||
         baseImponibleText.isBlank() || tipoIva.isBlank() ||
         cuotaIva.isBlank() ||  total.isBlank() ||
-        estado.isBlank() || proyecto.isBlank()
+        proyecto.isBlank()
 
             ) {
         return Pair(false, "Todos los campos son obligatorios.")

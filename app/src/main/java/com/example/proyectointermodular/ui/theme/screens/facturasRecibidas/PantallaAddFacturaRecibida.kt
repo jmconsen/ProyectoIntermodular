@@ -299,7 +299,7 @@ fun PantallaAddFacturaRecibida(
                             val metodoPagoOriginal = metodoPago
                             val (esValido, mensajeError) = validarCamposFacturaAddRec(
 
-                                numeroFactura = "1",
+                                numeroFactura = "",
                                 descripcion = descripcion,
                                 fechaRecepcion = fechaRecepcion,
                                 nombreEmisor = nombreEmisor,
@@ -423,11 +423,11 @@ fun validarCamposFacturaAddRec(
 
 ): Pair<Boolean, String?> {
     // Validación de campos obligatorios
-    if (numeroFactura.isBlank() || descripcion.isBlank() ||
+    if (descripcion.isBlank() ||
         fechaRecepcion.isBlank() || nombreEmisor.isBlank() ||
         cifEmisor.isBlank() || direccionEmisor.isBlank() ||
         baseImponibleText.isBlank() || tipoIva.isBlank() ||
-        cuotaIva.isBlank() || total.isBlank() || estado.isBlank()) {
+        cuotaIva.isBlank() || total.isBlank()) {
         return Pair(false, "Todos los campos son obligatorios.")
     }
 
