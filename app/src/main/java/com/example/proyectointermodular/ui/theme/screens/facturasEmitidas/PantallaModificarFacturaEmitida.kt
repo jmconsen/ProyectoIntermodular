@@ -23,6 +23,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
+
+val numberFormat = NumberFormat.getNumberInstance(Locale("es", "ES")).apply {
+    maximumFractionDigits = 2 // Máximo 2 decimales
+    minimumFractionDigits = 2 // Mínimo 2 decimales
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,8 +59,9 @@ fun PantallaModificarFacturaEmitida(
     var nombreReceptor by remember { mutableStateOf(facturaExistente.nombreReceptor) }
     var cifReceptor by remember { mutableStateOf(facturaExistente.cifReceptor) }
     var direccionReceptor by remember { mutableStateOf(facturaExistente.direccionReceptor) }
-    var baseImponible by remember { mutableStateOf(facturaExistente.baseImponible.toString()) }
-    var tipoIva by remember { mutableStateOf(facturaExistente.tipoIva.toString()) }
+    //var baseImponible by remember { mutableStateOf(facturaExistente.baseImponible.toString()) }
+    var baseImponible by remember { mutableStateOf(numberFormat.format(facturaExistente.baseImponible)) }
+    //var tipoIva by remember { mutableStateOf(facturaExistente.tipoIva.toString()) }
     var expanded by remember { mutableStateOf(false) }
     var estado by remember { mutableStateOf(facturaExistente.estado) }
 
@@ -67,39 +75,52 @@ fun PantallaModificarFacturaEmitida(
 
     var mostrarDialogoExito by remember { mutableStateOf(false) }
 
+    var tipoIva by remember {
+        mutableStateOf(
+            when (facturaExistente.tipoIva) {
+                21 -> "21%"
+                10 -> "10%"
+                4 -> "4%"
+                else -> "Exento o 0%"
+            }
+        )
+    }
 
     val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
 
     val tipoIvaValue = when (tipoIva) {
-        "21%" -> 0.21
-        "10%" -> 0.10
-        "4%" -> 0.04
-        else -> 0.0
+        "21%" -> 21
+        "10%" -> 10
+        "4%" -> 4
+        else -> 0
     }
 
+    val baseImponibleFormateado = remember(baseImponible) {
+        baseImponible.toDoubleOrNull()?.let {
+            String.format(Locale.GERMANY, "%,.2f", it) // Formato con coma y punto en España
+        } ?: ""
+    }
 
-    // Calcular cuota IVA de forma reactiva
+    // Calcular cuota IVA de forma reactiva y Formatear con coma decimal (formato España)
     val cuotaIva by remember(baseImponible, tipoIva) {
         derivedStateOf {
-            val base = baseImponible.toDoubleOrNull() ?: 0.00
+            val base = baseImponible.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
             val iva = when (tipoIva) {
                 "21%" -> 0.21
                 "10%" -> 0.10
                 "4%" -> 0.04
                 else -> 0.0
             }
-            (base * iva).toString()
-            //"%.2f".format(base * iva)
+            numberFormat.format(base * iva)
         }
     }
 
-    // Calcular total de forma reactiva
+    // Calcular total de forma reactiva y Formatear con coma decimal (formato España)
     val total by remember(baseImponible, cuotaIva) {
         derivedStateOf {
-            val base = baseImponible.toDoubleOrNull() ?: 0.00
-            val cuota = cuotaIva.toDoubleOrNull() ?: 0.00
-            (base + cuota).toString()
-            //"%.2f".format(base + cuota)
+            val base = baseImponible.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
+            val cuota = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
+            numberFormat.format(base + cuota)
         }
     }
 
@@ -276,11 +297,12 @@ fun PantallaModificarFacturaEmitida(
 
                 OutlinedTextField(
                     value = cuotaIva,
-                    onValueChange = { cuotaIva },
+                    onValueChange = {},
                     label = { Text("Cuota IVA") },
                     readOnly = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 OutlinedTextField(
                     value = total,
                     onValueChange = { total },
@@ -323,10 +345,12 @@ fun PantallaModificarFacturaEmitida(
                                 nombreReceptor = nombreReceptor,
                                 cifReceptor = cifReceptor,
                                 direccionReceptor = direccionReceptor,
-                                baseImponible = baseImponible.toDoubleOrNull() ?: 0.00,
+
+                                baseImponible = baseImponible.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
                                 tipoIva = tipoIvaValue,
-                                cuotaIva = cuotaIva.toDoubleOrNull() ?: 0.00,
-                                total = total.toDoubleOrNull() ?: 0.00,
+                                cuotaIva = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
+                                total = total.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
+
                                 estado = estado,
                                 proyecto = proyectoSeleccionado
                             )

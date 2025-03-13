@@ -14,7 +14,7 @@ data class FacturaEmitida(
 
     // Datos financieros
     val baseImponible: Double = 0.00,
-    val tipoIva: Double = 0.00,
+    val tipoIva: Int = 0,
     val cuotaIva: Double = 0.00,
     val total: Double = 0.00,
 

@@ -17,6 +17,13 @@ import com.example.proyectointermodular.modelo.FacturaRecibida
 import com.example.proyectointermodular.ui.theme.AzulOscuro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.viewmodel.FacturaViewModel
+import java.text.NumberFormat
+import java.util.Locale
+
+val numberFormat = NumberFormat.getNumberInstance(Locale("es", "ES")).apply {
+    maximumFractionDigits = 2 // Máximo 2 decimales
+    minimumFractionDigits = 2 // Mínimo 2 decimales
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,34 +52,42 @@ fun PantallaAddFacturaRecibida(
     //val cuotaIva = baseImponible * (tipoIva / 100)
     //val total = baseImponible + cuotaIva
 
-    val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
-    val tipoIvaValue = when (tipoIva) {
-        "21%" -> 0.21
-        "10%" -> 0.10
-        "4%" -> 0.04
-        else -> 0.0
+    // Formatear base imponible con coma decimal (formato España)
+    val baseImponibleFormateado = remember(baseImponibleText) {
+        baseImponibleText.toDoubleOrNull()?.let {
+            String.format(Locale.GERMANY, "%,.2f", it) // Formato con coma y punto en España
+        } ?: ""
     }
 
-    // Calcular cuota IVA de forma reactiva
+    val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
+
+    val tipoIvaValue = when (tipoIva) {
+        "21%" -> 21
+        "10%" -> 10
+        "4%" -> 4
+        else -> 0
+    }
+
+    // Calcular cuota IVA de forma reactiva y Formatear con coma decimal (formato España)
     val cuotaIva by remember(baseImponibleText, tipoIva) {
         derivedStateOf {
-            val base = baseImponibleText.toDoubleOrNull() ?: 0.00
+            val base = baseImponibleText.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
             val iva = when (tipoIva) {
                 "21%" -> 0.21
                 "10%" -> 0.10
                 "4%" -> 0.04
-                else -> 0.00
+                else -> 0.0
             }
-            (base * iva).toString()
+            numberFormat.format(base * iva)
         }
     }
 
-    // Calcular total de forma reactiva
+    // Calcular total de forma reactiva y Formatear con coma decimal (formato España)
     val total by remember(baseImponibleText, cuotaIva) {
         derivedStateOf {
-            val base = baseImponibleText.toDoubleOrNull() ?: 0.00
-            val cuota = cuotaIva.toDoubleOrNull() ?: 0.00
-            (base + cuota).toString()
+            val base = baseImponibleText.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
+            val cuota = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
+            numberFormat.format(base + cuota)
         }
     }
 
@@ -253,10 +268,12 @@ fun PantallaAddFacturaRecibida(
                                 nombreEmisor = nombreEmisor,
                                 cifEmisor = cifEmisor,
                                 direccionEmisor = direccionEmisor,
-                                baseImponible = baseImponibleText.toDouble(),
+
+                                baseImponible = baseImponibleText.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
                                 tipoIva = tipoIvaValue,
-                                cuotaIva = cuotaIva.toDouble(),
-                                total = total.toDouble(),
+                                cuotaIva = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
+                                total = total.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
+
                                 estado = "Pendiente",
                                 fechaPago = fechaPago.ifBlank { null },
                                 metodoPago = metodoPago.ifBlank { null }

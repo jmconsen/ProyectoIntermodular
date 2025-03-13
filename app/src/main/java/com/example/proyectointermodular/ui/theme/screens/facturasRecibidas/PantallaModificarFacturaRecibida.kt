@@ -19,6 +19,8 @@ import androidx.navigation.NavHostController
 import com.example.proyectointermodular.ui.theme.AzulOscuro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.viewmodel.FacturaViewModel
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,8 +50,8 @@ fun PantallaModificarFacturaRecibida(
     var nombreEmisor by remember { mutableStateOf(facturaExistente.nombreEmisor) }
     var cifEmisor by remember { mutableStateOf(facturaExistente.cifEmisor) }
     var direccionEmisor by remember { mutableStateOf(facturaExistente.direccionEmisor) }
-    var baseImponible by remember { mutableStateOf(facturaExistente.baseImponible.toString()) }
-    var tipoIva by remember { mutableStateOf(facturaExistente.tipoIva.toString()) }
+    var baseImponible by remember { mutableStateOf(numberFormat.format(facturaExistente.baseImponible)) }
+    //var tipoIva by remember { mutableStateOf(facturaExistente.tipoIva.toString()) }
     var fechaPago by remember { mutableStateOf(facturaExistente.fechaPago ?: "") }
     var metodoPago by remember { mutableStateOf(facturaExistente.metodoPago ?: "") }
     var estado by remember { mutableStateOf(facturaExistente.estado) }
@@ -62,36 +64,52 @@ fun PantallaModificarFacturaRecibida(
 
     var mostrarDialogoExito by remember { mutableStateOf(false) }
 
+    var tipoIva by remember {
+        mutableStateOf(
+            when (facturaExistente.tipoIva) {
+                21 -> "21%"
+                10 -> "10%"
+                4 -> "4%"
+                else -> "Exento o 0%"
+            }
+        )
+    }
+
     val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
 
     val tipoIvaValue = when (tipoIva) {
-        "21%" -> 0.21
-        "10%" -> 0.10
-        "4%" -> 0.04
-        else -> 0.0
+        "21%" -> 21
+        "10%" -> 10
+        "4%" -> 4
+        else -> 0
     }
 
+    val baseImponibleFormateado = remember(baseImponible) {
+        baseImponible.toDoubleOrNull()?.let {
+            String.format(Locale.GERMANY, "%,.2f", it) // Formato con coma y punto en España
+        } ?: ""
+    }
 
-    // Calcular cuota IVA de forma reactiva
+    // Calcular cuota IVA de forma reactiva y Formatear con coma decimal (formato España)
     val cuotaIva by remember(baseImponible, tipoIva) {
         derivedStateOf {
-            val base = baseImponible.toDoubleOrNull() ?: 0.00
+            val base = baseImponible.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
             val iva = when (tipoIva) {
                 "21%" -> 0.21
                 "10%" -> 0.10
                 "4%" -> 0.04
                 else -> 0.0
             }
-            (base * iva).toString()
+            com.example.proyectointermodular.ui.theme.screens.facturasEmitidas.numberFormat.format(base * iva)
         }
     }
 
-    // Calcular total de forma reactiva
+    // Calcular total de forma reactiva y Formatear con coma decimal (formato España)
     val total by remember(baseImponible, cuotaIva) {
         derivedStateOf {
-            val base = baseImponible.toDoubleOrNull() ?: 0.00
-            val cuota = cuotaIva.toDoubleOrNull() ?: 0.00
-            (base + cuota).toString()
+            val base = baseImponible.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
+            val cuota = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
+            com.example.proyectointermodular.ui.theme.screens.facturasEmitidas.numberFormat.format(base + cuota)
         }
     }
 
@@ -283,10 +301,12 @@ fun PantallaModificarFacturaRecibida(
                                 nombreEmisor = nombreEmisor,
                                 cifEmisor = cifEmisor,
                                 direccionEmisor = direccionEmisor,
-                                baseImponible = baseImponible.toDoubleOrNull() ?: 0.00,
+
+                                baseImponible = baseImponible.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
                                 tipoIva = tipoIvaValue,
-                                cuotaIva = cuotaIva.toDoubleOrNull() ?: 0.00,
-                                total = total.toDoubleOrNull() ?: 0.00,
+                                cuotaIva = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
+                                total = total.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
+
                                 estado = estado,
                                 fechaPago = fechaPago.ifBlank { null },
                                 metodoPago = metodoPago.ifBlank { null }
