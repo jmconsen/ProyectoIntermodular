@@ -19,6 +19,13 @@ import com.example.proyectointermodular.ui.theme.AzulOscuro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.example.proyectointermodular.ui.theme.GrisOscuro2
 import com.example.proyectointermodular.viewmodel.FacturaViewModel
+import java.text.NumberFormat
+import java.util.Locale
+
+val formatoNumero = NumberFormat.getInstance(Locale.GERMANY).apply {
+    minimumFractionDigits = 2
+    maximumFractionDigits = 2
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,10 +134,10 @@ fun PantallaDetalleFacturaEmitida(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(text = "Base Imponible: ${factura.baseImponible}€", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "Base Imponible: ${formatoNumero.format(factura.baseImponible)}€", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
                     Text(text = "Tipo IVA: ${factura.tipoIva}%", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
-                    Text(text = "Cuota IVA: ${factura.cuotaIva}€", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
-                    Text(text = "Total: ${factura.total}€", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "Cuota IVA: ${formatoNumero.format(factura.cuotaIva)}€", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
+                    Text(text = "Total: ${formatoNumero.format(factura.total)}€", style = MaterialTheme.typography.bodyLarge, color = GrisOscuro2)
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))

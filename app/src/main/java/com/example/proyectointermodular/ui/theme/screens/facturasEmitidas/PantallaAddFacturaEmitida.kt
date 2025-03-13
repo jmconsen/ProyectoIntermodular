@@ -27,6 +27,9 @@ import androidx.compose.ui.graphics.Brush
 import com.example.proyectointermodular.ui.theme.AzulOscuro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.NumberFormat
+import java.util.Locale
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,16 +55,43 @@ fun PantallaAddFacturaEmitida(
     var proyectoSeleccionado by remember { mutableStateOf("") }
     var expandedProyectos by remember { mutableStateOf(false) }
 
-    val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
-    /*
-    val tipoIvaValue = when (tipoIva) {
-        "21%" -> 0.21
-        "10%" -> 0.10
-        "4%" -> 0.04
-        else -> 0.0
+    val baseImponibleFormateado = remember(baseImponibleText) {
+        baseImponibleText.toDoubleOrNull()?.let {
+            String.format(Locale.GERMANY, "%,.2f", it) // Formato con coma y punto en España
+        } ?: ""
     }
 
-     */
+    val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
+
+    val tipoIvaValue = when (tipoIva) {
+        "21%" -> 21
+        "10%" -> 10
+        "4%" -> 4
+        else -> 0
+    }
+
+    // Calcular cuota IVA de forma reactiva y Formatear con coma decimal (formato España)
+    val cuotaIva by remember(baseImponibleText, tipoIva) {
+        derivedStateOf {
+            val base = baseImponibleText.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
+            val iva = when (tipoIva) {
+                "21%" -> 0.21
+                "10%" -> 0.10
+                "4%" -> 0.04
+                else -> 0.0
+            }
+            numberFormat.format(base * iva)
+        }
+    }
+
+    // Calcular total de forma reactiva y Formatear con coma decimal (formato España)
+    val total by remember(baseImponibleText, cuotaIva) {
+        derivedStateOf {
+            val base = baseImponibleText.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
+            val cuota = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00
+            numberFormat.format(base + cuota)
+        }
+    }
 
     // Obtener proyectos desde Firebase
     LaunchedEffect(Unit) {
@@ -76,29 +106,6 @@ fun PantallaAddFacturaEmitida(
                     snackbarHostState.showSnackbar("Error al obtener proyectos: ${exception.message}")
                 }
             }
-    }
-
-    // Calcular cuota IVA de forma reactiva
-    val cuotaIva by remember(baseImponibleText, tipoIva) {
-        derivedStateOf {
-            val base = baseImponibleText.toDoubleOrNull() ?: 0.00
-            val iva = when (tipoIva) {
-                "21%" -> 0.21
-                "10%" -> 0.10
-                "4%" -> 0.04
-                else -> 0.00
-            }
-            (base * iva).toString()
-        }
-    }
-
-    // Calcular total de forma reactiva
-    val total by remember(baseImponibleText, cuotaIva) {
-        derivedStateOf {
-            val base = baseImponibleText.toDoubleOrNull() ?: 0.00
-            val cuota = cuotaIva.toDoubleOrNull() ?: 0.00
-            (base + cuota).toString()
-        }
     }
 
     Scaffold(
@@ -285,11 +292,12 @@ fun PantallaAddFacturaEmitida(
                                     nombreReceptor = nombreReceptor,
                                     cifReceptor = cifReceptor,
                                     direccionReceptor = direccionReceptor,
-                                    baseImponible = baseImponibleText.toDouble(),
-                                    //tipoIva = tipoIvaValue,
-                                    tipoIva = tipoIva.toDouble(),
-                                    cuotaIva = cuotaIva.toDouble(),
-                                    total = total.toDouble(),
+
+                                    baseImponible = baseImponibleText.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
+                                    tipoIva = tipoIvaValue,
+                                    cuotaIva = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
+                                    total = total.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
+
                                     estado = "Pendiente",
                                     proyecto = proyectoSeleccionado
                                 )
@@ -320,3 +328,68 @@ fun PantallaAddFacturaEmitida(
         Spacer(modifier = Modifier.height(64.dp))
     }
 }
+
+/*
+fun validarCamposFacturaAdd(
+    //id: Int,
+    numeroFactura: String,
+    descripcion: String,
+    fechaEmision: String,
+    nombreReceptor: String,
+    cifReceptor: String,
+    direccionReceptor: String,
+    baseImponibleText: String,
+    tipoIva: String,
+    cuotaIva: String,
+    total: String,
+    estado: String,
+    proyecto: String
+
+
+
+): Pair<Boolean, String?> {
+    // Validación de campos obligatorios y longitud máxima
+    if (numeroFactura.isBlank() || descripcion.isBlank() ||
+        fechaEmision.isBlank() || nombreReceptor.isBlank() ||
+        cifReceptor.isBlank() || direccionReceptor.isBlank() ||
+        baseImponibleText.isBlank() || tipoIva.isBlank() ||
+        cuotaIva.isBlank() ||  total.isBlank() ||
+        estado.isBlank() || proyecto.isBlank()
+
+            ) {
+        return Pair(false, "Todos los campos son obligatorios.")
+    }
+    if (cifReceptor.length > 9) {
+
+        return Pair(false, "El CIF no puede tener más de 9 caracteres.")
+    }
+    if (descripcion.length > 50 ||
+        nombreReceptor.length > 50 ||
+        direccionReceptor.length > 50) {
+
+        return Pair(false, "Descripción, Nombre y Dirección no pueden exceder los 50 caracteres.")
+    }
+
+    // Validación de CIF
+    val cifRegex = "^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$".toRegex()
+
+    if (!cifReceptor.matches(cifRegex)) {
+        return Pair(false, "El formato del CIF no es válido.")
+    }
+
+    // Validación de longitud y contenido de Descripción, Nombre y Dirección
+    if (descripcion.length < 2 ||
+        nombreReceptor.length < 2 ||
+        direccionReceptor.length < 2) {
+
+        return Pair(false, "Descripción, Nombre y Dirección deben tener al menos 2 caracteres.")
+    }
+    if (descripcion.any { it.isDigit() } ||
+        nombreReceptor.any { it.isDigit() }
+    ) {
+        return Pair(false, "Descripción y Nombre no deben contener números.")
+    }
+
+    return Pair(true, null)
+}
+*/

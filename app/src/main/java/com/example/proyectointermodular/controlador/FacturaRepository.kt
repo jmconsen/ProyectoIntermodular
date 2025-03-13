@@ -60,7 +60,7 @@ class FacturaRepository {
         val nuevaFactura = factura.copy(id = documentRef.id, numeroFactura = numeroFactura)
 
         documentRef.set(nuevaFactura).await() // Guarda en Firestore
-        navHostController.navigate("PantallaFacturasEmitidas") // Navega de vuelta a PantallaFacturasEmitidas
+        navHostController.navigate("PantallaFacturasRecibidas") // Navega de vuelta a PantallaFacturasRecibidas
     }
 
     suspend fun obtenerFacturasRecibidas(): List<FacturaRecibida> {
