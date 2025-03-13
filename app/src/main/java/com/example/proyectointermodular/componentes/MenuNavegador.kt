@@ -43,13 +43,13 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
                     Icon(
                         Icons.AutoMirrored.Filled.ReceiptLong,
                         contentDescription = "Facturas-emitidas",
-                        tint = GrisOscuro2
+                        //tint = GrisOscuro2
                     )
                 },
                 label = {
                     Text(
                         "Fact. Emitidas",
-                        color = GrisOscuro2
+                        //color = GrisOscuro2
                     )
                 },
                 selected = currentRoute == "PantallaFacturasEmitidas",
@@ -68,13 +68,13 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
                     Icon(
                         Icons.Filled.RequestQuote,
                         contentDescription = "Facturas-recibidas",
-                        tint = GrisOscuro2
+                        //tint = GrisOscuro2
                     )
                 },
                 label = {
                     Text(
                         "Fact. Recibidas",
-                        color = GrisOscuro2
+                        //color = GrisOscuro2
                     )
                 },
                 selected = currentRoute == "PantallaFacturasRecibidas",
@@ -94,13 +94,13 @@ fun MenuNavegador(navController: NavHostController, authManager: AuthManager) {
                     Icon(
                         Icons.Filled.ExitToApp,
                         contentDescription = "Salir",
-                        tint = GrisOscuro2
+                        //tint = GrisOscuro2
                     )
                 },
                 label = {
                     Text(
                         "Salir",
-                        color = GrisOscuro2,
+                        //color = GrisOscuro2,
                     )
                 },
                 selected = false,
