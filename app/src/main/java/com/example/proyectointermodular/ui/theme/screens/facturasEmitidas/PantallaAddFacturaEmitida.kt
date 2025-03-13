@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.proyectointermodular.ui.theme.AzulOscuro
 import com.example.proyectointermodular.ui.theme.FondoPantallas
 import com.google.firebase.firestore.FirebaseFirestore
@@ -61,7 +63,6 @@ fun PantallaAddFacturaEmitida(
             String.format(Locale.GERMANY, "%,.2f", it) // Formato con coma y punto en España
         } ?: ""
     }
-
 
     val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
 
@@ -205,11 +206,41 @@ fun PantallaAddFacturaEmitida(
                     label = { Text("Dirección del Receptor") },
                     modifier = Modifier.fillMaxWidth()
                 )
+                /*
                 OutlinedTextField(
                     value = baseImponibleText,
                     onValueChange = { baseImponibleText = it },
                     label = { Text("Base Imponible") },
                     modifier = Modifier.fillMaxWidth()
+                )
+                */
+
+                OutlinedTextField(
+                    value = baseImponibleText,
+                    onValueChange = { newValue ->
+                        // Permitir solo números y una única coma
+                        val filteredValue = newValue.filter { it.isDigit() || it == ',' }
+
+                        // Permitir solo una coma
+                        val commaCount = filteredValue.count { it == ',' }
+                        if (commaCount > 1) return@OutlinedTextField // No actualizar si hay más de una coma
+
+                        // Verificar si hay coma y limitar a dos decimales
+                        val parts = filteredValue.split(',')
+                        val formattedValue = if (parts.size == 2) {
+                            val integerPart = parts[0]
+                            val decimalPart = parts[1].take(2) // Tomar solo los primeros dos decimales
+                            "$integerPart,$decimalPart"
+                        } else {
+                            filteredValue
+                        }
+
+                        // Asignar el valor filtrado
+                        baseImponibleText = formattedValue
+                    },
+                    label = { Text("Base Imponible") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
                 // Desplegable para seleccionar el tipo de IVA
@@ -309,49 +340,91 @@ fun PantallaAddFacturaEmitida(
                     Spacer(modifier = Modifier.width(16.dp))
                     Button(
                         onClick = {
-                            if (descripcion.isNotBlank() && fechaEmision.isNotBlank() &&
-                                nombreReceptor.isNotBlank() && cifReceptor.isNotBlank() && direccionReceptor.isNotBlank() &&
-                                baseImponibleText.isNotBlank() && tipoIva.isNotBlank()
-                            ) {
-                                val factura = FacturaEmitida(
+                            val (esValido, mensajeError) = validarCamposFacturaAdd(
+                                numeroFactura = "1",
+                                descripcion = descripcion,
+                                fechaEmision = fechaEmision,
+                                nombreReceptor = nombreReceptor,
+                                cifReceptor = cifReceptor,
+                                direccionReceptor = direccionReceptor,
+                                baseImponibleText = baseImponibleText,
+                                tipoIva = tipoIva,
+                                cuotaIva = cuotaIva,
+                                total = total,
+                                estado = "Pendiente",
+                                proyecto = proyectoSeleccionado
+                            )
+
+                            if (!esValido) {
+                                mensajeErrorValidacion = mensajeError ?: "Error desconocido"
+                                mostrarDialogoError = true
+                            } else {
+                                val nuevaFactura = FacturaEmitida(
                                     id = "",
                                     descripcion = descripcion,
                                     fechaEmision = fechaEmision,
                                     nombreReceptor = nombreReceptor,
                                     cifReceptor = cifReceptor,
                                     direccionReceptor = direccionReceptor,
-
-
                                     baseImponible = baseImponibleText.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
                                     tipoIva = tipoIvaValue,
                                     cuotaIva = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
                                     total = total.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
-
-
                                     estado = "Pendiente",
-                                    proyecto = proyectoSeleccionado,
-                                    proyectoId = proyectoSeleccionadoId
+                                    proyecto = proyectoSeleccionado
                                 )
-                                facturaViewModel.agregarFacturaEmitida(factura, navHostController)
-                                facturaGuardada = true
+
+                                facturaViewModel.agregarFacturaEmitida(nuevaFactura, navHostController)
+                                mostrarDialogoExito = true  // Mostramos el diálogo de éxito
                             }
                         },
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = AzulOscuro
-                        )
+                        colors = ButtonDefaults.buttonColors(containerColor = AzulOscuro)
                     ) {
                         Text("Guardar")
+                    }
+
+                    // 🔹 Diálogo de éxito al guardar la factura
+                    if (mostrarDialogoExito) {
+                        AlertDialog(
+                            onDismissRequest = { /* Evitar que el usuario lo cierre sin aceptar */ },
+                            title = { Text("Factura Guardada") },
+                            text = { Text("La factura se ha guardado correctamente.") },
+                            confirmButton = {
+                                Button(onClick = {
+                                    mostrarDialogoExito = false
+                                    navHostController.navigate("PantallaFacturasEmitidas") // Redirigir tras aceptar
+                                }) {
+                                    Text("Aceptar")
+                                }
+                            }
+                        )
+                    }
+
+                    // 🔹 Diálogo de error si la validación falla
+                    if (mostrarDialogoError) {
+                        AlertDialog(
+                            onDismissRequest = { mostrarDialogoError = false },
+                            title = { Text("Error de validación") },
+                            text = { Text(mensajeErrorValidacion) },
+                            confirmButton = {
+                                Button(onClick = { mostrarDialogoError = false }) {
+                                    Text("Aceptar")
+                                }
+                            }
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(64.dp))
 
+                /*
                 LaunchedEffect(facturaGuardada) {
                     if (facturaGuardada) {
                         snackbarHostState.showSnackbar("Factura creada exitosamente")
                         facturaGuardada = false
                     }
                 }
+                 */
 
             }
         }
@@ -359,7 +432,7 @@ fun PantallaAddFacturaEmitida(
     }
 }
 
-/*
+
 fun validarCamposFacturaAdd(
     //id: Int,
     numeroFactura: String,
@@ -389,10 +462,12 @@ fun validarCamposFacturaAdd(
             ) {
         return Pair(false, "Todos los campos son obligatorios.")
     }
+
     if (cifReceptor.length > 9) {
 
         return Pair(false, "El CIF no puede tener más de 9 caracteres.")
     }
+
     if (descripcion.length > 50 ||
         nombreReceptor.length > 50 ||
         direccionReceptor.length > 50) {
@@ -400,11 +475,18 @@ fun validarCamposFacturaAdd(
         return Pair(false, "Descripción, Nombre y Dirección no pueden exceder los 50 caracteres.")
     }
 
-    // Validación de CIF
-    val cifRegex = "^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$".toRegex()
+    // Validación de la fecha en formato dd/mm/aaaa
+    val fechaRegex = "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([12]\\d{3})$".toRegex()
+    if (!fechaEmision.matches(fechaRegex)) {
+        return Pair(false, "El formato de la fecha debe ser dd/mm/aaaa.")
+    }
 
-    if (!cifReceptor.matches(cifRegex)) {
-        return Pair(false, "El formato del CIF no es válido.")
+    // Validación de CIF y DNI
+    val cifRegex = "^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$".toRegex()
+    val dniRegex = "^[0-9]{8}[A-HJ-NP-TV-Z]$".toRegex() // DNI español
+
+    if (!cifReceptor.matches(cifRegex) && !cifReceptor.matches(dniRegex)) {
+        return Pair(false, "El CIF o DNI introducido no es válido.")
     }
 
     // Validación de longitud y contenido de Descripción, Nombre y Dirección
@@ -414,12 +496,14 @@ fun validarCamposFacturaAdd(
 
         return Pair(false, "Descripción, Nombre y Dirección deben tener al menos 2 caracteres.")
     }
+
+    /*
     if (descripcion.any { it.isDigit() } ||
         nombreReceptor.any { it.isDigit() }
     ) {
         return Pair(false, "Descripción y Nombre no deben contener números.")
     }
+    */
 
     return Pair(true, null)
 }
-*/

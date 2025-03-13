@@ -74,6 +74,8 @@ fun PantallaModificarFacturaEmitida(
     //val total = (baseImponible.toDoubleOrNull() ?: 0.00) + cuotaIva
 
     var mostrarDialogoExito by remember { mutableStateOf(false) }
+    var mostrarDialogoError by remember { mutableStateOf(false) }
+    var mensajeErrorValidacion by remember { mutableStateOf("") }
 
     var tipoIva by remember {
         mutableStateOf(
@@ -216,12 +218,40 @@ fun PantallaModificarFacturaEmitida(
 
                 OutlinedTextField(
                     value = baseImponible,
+                    onValueChange = { newValue ->
+                        // Permitir solo números y una única coma
+                        val filteredValue = newValue.filter { it.isDigit() || it == ',' }
+
+                        // Permitir solo una coma
+                        val commaCount = filteredValue.count { it == ',' }
+                        if (commaCount > 1) return@OutlinedTextField // No actualizar si hay más de una coma
+
+                        // Verificar si hay coma y limitar a dos decimales
+                        val parts = filteredValue.split(',')
+                        val formattedValue = if (parts.size == 2) {
+                            val integerPart = parts[0]
+                            val decimalPart = parts[1].take(2) // Tomar solo los primeros dos decimales
+                            "$integerPart,$decimalPart"
+                        } else {
+                            filteredValue
+                        }
+
+                        // Asignar el valor filtrado
+                        baseImponible = formattedValue
+                    },
+                    label = { Text("Base Imponible") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+
+                /*
+                OutlinedTextField(
+                    value = baseImponible,
                     onValueChange = { baseImponible = it },
                     label = { Text("Base Imponible") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                /*
                 OutlinedTextField(
                     value = tipoIva,
                     onValueChange = { tipoIva = it },
@@ -339,48 +369,164 @@ fun PantallaModificarFacturaEmitida(
 
                     Button(
                         onClick = {
-                            val facturaActualizada = facturaExistente.copy(
+                            // Validar los campos antes de proceder
+                            val (esValido, mensajeError) = validarCamposFacturaModif(
+                                numeroFactura = "1",  // Aquí puedes usar el número de factura real
                                 descripcion = descripcion,
                                 fechaEmision = fechaEmision,
                                 nombreReceptor = nombreReceptor,
                                 cifReceptor = cifReceptor,
                                 direccionReceptor = direccionReceptor,
-
-                                baseImponible = baseImponible.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
-                                tipoIva = tipoIvaValue,
-                                cuotaIva = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
-                                total = total.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
-
+                                baseImponible = baseImponible.replace(".", "")
+                                    .replace(",", "."),
+                                tipoIva = tipoIva,
+                                cuotaIva = cuotaIva.replace(".", "").replace(",", "."),
+                                total = total.replace(".", "").replace(",", "."),
                                 estado = estado,
                                 proyecto = proyectoSeleccionado
                             )
-                            facturaViewModel.actualizarFacturaEmitida(facturaActualizada)
-                            mostrarDialogoExito = true
+
+                            if (!esValido) {
+                                // Mostrar el mensaje de error de validación si no es válido
+                                mensajeErrorValidacion = mensajeError ?: "Error desconocido"
+                                mostrarDialogoError = true
+                            } else {
+                                // Si la validación es exitosa, actualizar la factura
+                                val facturaActualizada = facturaExistente.copy(
+                                    descripcion = descripcion,
+                                    fechaEmision = fechaEmision,
+                                    nombreReceptor = nombreReceptor,
+                                    cifReceptor = cifReceptor,
+                                    direccionReceptor = direccionReceptor,
+                                    baseImponible = baseImponible.replace(".", "").replace(",", ".")
+                                        .toDoubleOrNull() ?: 0.00,
+                                    tipoIva = tipoIvaValue,
+                                    cuotaIva = cuotaIva.replace(".", "").replace(",", ".")
+                                        .toDoubleOrNull() ?: 0.00,
+                                    total = total.replace(".", "").replace(",", ".")
+                                        .toDoubleOrNull() ?: 0.00,
+                                    estado = estado,
+                                    proyecto = proyectoSeleccionado
+                                )
+
+                                // Actualizar la factura en la base de datos o en el ViewModel
+                                facturaViewModel.actualizarFacturaEmitida(facturaActualizada)
+                                mostrarDialogoExito = true // Mostrar diálogo de éxito
+                            }
                         },
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = AzulOscuro
-                        )
+                        colors = ButtonDefaults.buttonColors(containerColor = AzulOscuro)
                     ) {
                         Text("Guardar")
                     }
+
+                    // Diálogo de éxito al guardar la factura
+                    if (mostrarDialogoExito) {
+                        AlertDialog(
+                            onDismissRequest = { /* Evitar que el usuario lo cierre sin aceptar */ },
+                            title = { Text("Factura Guardada") },
+                            text = { Text("La factura se ha guardado correctamente.") },
+                            confirmButton = {
+                                Button(onClick = {
+                                    mostrarDialogoExito = false
+                                    navHostController.navigate("PantallaFacturasEmitidas") // Redirigir tras aceptar
+                                }) {
+                                    Text("Aceptar")
+                                }
+                            }
+                        )
+                    }
+
+                    // 🔹 Diálogo de error si la validación falla
+                    if (mostrarDialogoError) {
+                        AlertDialog(
+                            onDismissRequest = { mostrarDialogoError = false },
+                            title = { Text("Error de validación") },
+                            text = { Text(mensajeErrorValidacion) },
+                            confirmButton = {
+                                Button(onClick = { mostrarDialogoError = false }) {
+                                    Text("Aceptar")
+                                }
+                            }
+                        )
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (mostrarDialogoExito) {
-                    Snackbar(
-                        action = {
-                            TextButton(onClick = {
-                                mostrarDialogoExito = false
-                                navHostController.popBackStack()
-                            }) { Text("Aceptar") }
-                        }
-                    ) { Text("Factura actualizada correctamente.") }
-                }
-
                 Spacer(modifier = Modifier.height(64.dp))
             }
         }
     }
+}
+
+
+fun validarCamposFacturaModif(
+    //id: Int,
+    numeroFactura: String,
+    descripcion: String,
+    fechaEmision: String,
+    nombreReceptor: String,
+    cifReceptor: String,
+    direccionReceptor: String,
+    baseImponible: String,
+    tipoIva: String,
+    cuotaIva: String,
+    total: String,
+    estado: String,
+    proyecto: String
+
+
+
+): Pair<Boolean, String?> {
+    // Validación de campos obligatorios y longitud máxima
+    if (numeroFactura.isBlank() || descripcion.isBlank() ||
+        fechaEmision.isBlank() || nombreReceptor.isBlank() ||
+        cifReceptor.isBlank() || direccionReceptor.isBlank() ||
+        baseImponible.isBlank() || tipoIva.isBlank() ||
+        cuotaIva.isBlank() ||  total.isBlank() ||
+        estado.isBlank() || proyecto.isBlank()
+
+    ) {
+        return Pair(false, "Todos los campos son obligatorios.")
+    }
+    if (cifReceptor.length > 9) {
+
+        return Pair(false, "El CIF no puede tener más de 9 caracteres.")
+    }
+    if (descripcion.length > 50 ||
+        nombreReceptor.length > 50 ||
+        direccionReceptor.length > 50) {
+
+        return Pair(false, "Descripción, Nombre y Dirección no pueden exceder los 50 caracteres.")
+    }
+
+    // Validación de la fecha en formato dd/mm/aaaa
+    val fechaRegex = "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([12]\\d{3})$".toRegex()
+    if (!fechaEmision.matches(fechaRegex)) {
+        return Pair(false, "El formato de la fecha debe ser dd/mm/aaaa.")
+    }
+
+    // Validación de CIF y DNI
+    val cifRegex = "^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$".toRegex()
+    val dniRegex = "^[0-9]{8}[A-HJ-NP-TV-Z]$".toRegex() // DNI español
+
+    if (!cifReceptor.matches(cifRegex) && !cifReceptor.matches(dniRegex)) {
+        return Pair(false, "El CIF o DNI introducido no es válido.")
+    }
+
+    // Validación de longitud y contenido de Descripción, Nombre y Dirección
+    if (descripcion.length < 2 ||
+        nombreReceptor.length < 2 ||
+        direccionReceptor.length < 2) {
+
+        return Pair(false, "Descripción, Nombre y Dirección deben tener al menos 2 caracteres.")
+    }
+
+    /*
+    if (descripcion.any { it.isDigit() } ||
+        nombreReceptor.any { it.isDigit() }
+    ) {
+        return Pair(false, "Descripción y Nombre no deben contener números.")
+    }
+    */
+
+    return Pair(true, null)
 }
