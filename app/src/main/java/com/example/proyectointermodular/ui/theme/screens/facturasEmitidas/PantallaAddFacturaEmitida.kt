@@ -53,6 +53,7 @@ fun PantallaAddFacturaEmitida(
 
     var proyectos by remember { mutableStateOf(listOf<String>()) }
     var proyectoSeleccionado by remember { mutableStateOf("") }
+    var proyectoSeleccionadoId by remember { mutableStateOf("") }
     var expandedProyectos by remember { mutableStateOf(false) }
 
     val baseImponibleFormateado = remember(baseImponibleText) {
@@ -61,6 +62,7 @@ fun PantallaAddFacturaEmitida(
         } ?: ""
     }
 
+
     val tiposIva = listOf("21%", "10%", "4%", "Exento o 0%")
 
     val tipoIvaValue = when (tipoIva) {
@@ -68,6 +70,32 @@ fun PantallaAddFacturaEmitida(
         "10%" -> 10
         "4%" -> 4
         else -> 0
+
+     */
+      /*
+    var proyectosMap by remember { mutableStateOf(mapOf<String, String>()) }
+
+    // Obtener proyectos desde Firebase
+    LaunchedEffect(Unit) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("proyectos")
+            .get()
+            .addOnSuccessListener { result ->
+                val map = mutableMapOf<String, String>()
+                for (document in result) {
+                    val id = document.id
+                    val nombre = document.getString("nombre") ?: ""
+                    map[id] = nombre
+                }
+                proyectosMap = map
+            }
+            .addOnFailureListener { exception ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    snackbarHostState.showSnackbar("Error al obtener proyectos: ${exception.message}")
+                }
+            }
+            */
+
     }
 
     // Calcular cuota IVA de forma reactiva y Formatear con coma decimal (formato España)
@@ -233,11 +261,12 @@ fun PantallaAddFacturaEmitida(
                         expanded = expandedProyectos,
                         onDismissRequest = { expandedProyectos = false }
                     ) {
-                        proyectos.forEach { proyecto ->
+                        proyectosMap.forEach { (id, nombre) ->
                             DropdownMenuItem(
-                                text = { Text(proyecto) },
+                                text = { Text(nombre) },
                                 onClick = {
-                                    proyectoSeleccionado = proyecto
+                                    proyectoSeleccionado = nombre
+                                    proyectoSeleccionadoId = id
                                     expandedProyectos = false
                                 }
                             )
@@ -293,13 +322,16 @@ fun PantallaAddFacturaEmitida(
                                     cifReceptor = cifReceptor,
                                     direccionReceptor = direccionReceptor,
 
+
                                     baseImponible = baseImponibleText.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
                                     tipoIva = tipoIvaValue,
                                     cuotaIva = cuotaIva.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
                                     total = total.replace(".", "").replace(",", ".").toDoubleOrNull() ?: 0.00,
 
+
                                     estado = "Pendiente",
-                                    proyecto = proyectoSeleccionado
+                                    proyecto = proyectoSeleccionado,
+                                    proyectoId = proyectoSeleccionadoId
                                 )
                                 facturaViewModel.agregarFacturaEmitida(factura, navHostController)
                                 facturaGuardada = true

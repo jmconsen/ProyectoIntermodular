@@ -22,7 +22,8 @@ data class FacturaEmitida(
     val estado: String = "Pendiente",
 
     //Proyecto asociado
-    val proyecto: String = ""
+    val proyecto: String = "",
+    val proyectoId: String = ""
 
 ) {
     // Los datos del emisor siempre son los de la empresa
